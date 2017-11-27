@@ -15,8 +15,8 @@ namespace UnitTestProject
     {
         const string filename = "testProject.scp";
 
-        [TestInitialize]
-        public void TestInitialize()
+        [AssemblyInitialize]
+        public static void AssemblyInitialize(TestContext context)
         {
             // Init plugin reader
             string pluginPath = System.IO.Path.Combine(Environment.CurrentDirectory);

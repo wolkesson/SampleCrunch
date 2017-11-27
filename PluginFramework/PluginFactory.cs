@@ -96,7 +96,6 @@ namespace PluginFramework
         private static List<Type> modelTypes = new List<Type>();
         public static Type[] GetModelTypes()
         {
-
             var types = from item in PluginFactory.PanelFactorys select item.ModelType;
             var list = types.ToList<Type>();
             list.AddRange(modelTypes);
