@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="Sample_Crunch.Controls.Timeline"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Sample_Crunch.Controls"
+             xmlns:sc="clr-namespace:Sample_Crunch"  
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="600">
+    <UserControl.Resources>
+        <sc:TimeToTextConverter x:Key="TimeToTextConverter"/>
+
+        <Style TargetType="Thumb" x:Key="slider">
+            <Setter Property="Background" Value="#FFFFAE00"/>
+            <Setter Property="Width" Value="6" />
+            <Setter Property="Cursor" Value="SizeWE" />
+        </Style>
+    </UserControl.Resources>
+    <Canvas SizeChanged="canvas_SizeChanged" x:Name="canvas" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:Timeline}}}">
+        <Rectangle x:Name="rectangle" Canvas.Left="0" Height="30" Fill="#99CCCCCC" HorizontalAlignment="Stretch"/>
+        <Thumb x:Name="startMarker" Canvas.Left="0" Height="30" DragDelta="startThumb_DragDelta" Style="{StaticResource slider}" />
+        <Thumb x:Name="stopMarker" Canvas.Right="0" Height="30" DragDelta="stopMarker_DragDelta" Style="{StaticResource slider}" />
+    </Canvas>
+</UserControl>

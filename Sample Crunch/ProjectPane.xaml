@@ -1,0 +1,77 @@
+﻿<UserControl x:Class="Sample_Crunch.ProjectPane"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+             xmlns:sc="clr-namespace:Sample_Crunch"
+             xmlns:vm="clr-namespace:Sample_Crunch.ViewModel"
+             xmlns:dat="clr-namespace:System.Windows.Data;assembly=PresentationFramework"
+             xmlns:xc="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+             d:DesignHeight="300" d:DesignWidth="200"
+             mc:Ignorable="d">
+
+    <DockPanel DataContext="{Binding Main, Source={StaticResource Locator}}">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,3">
+            <!--<Button Command="{Binding Project.AddFileToProjectCommand}" Content="Add" />
+                <Button Command="{Binding Project.RemoveFromProjectCommand}" Content="Remove" CommandParameter="{Binding SelectedFile}"/>
+                <Button Command="{Binding Project.ShowFileAlignFormCommand}" Content="Align" />-->
+            <ToggleButton Margin="0,0,3,0" IsChecked="{Binding Project.AlphabeticalSorted}" Height="25" Width="25" >
+                <Image Source="/Resources/appbar.sort.alphabetical.png" Stretch="Uniform"/>
+            </ToggleButton>
+            <xc:WatermarkTextBox Text="{Binding Project.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Watermark="Search" />
+        </DockPanel>
+        <TreeView ItemsSource="{Binding Project.Files}" SelectedItemChanged="treeView_SelectedItemChanged" x:Name="treeView" 
+                      Drop="treeView_Drop" DragEnter="treeView_DragOver" DragOver="treeView_DragOver" AllowDrop="true">
+            <TreeView.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding Project.RemoveFromProjectCommand}" CommandParameter="{Binding SelectedFile}" />
+            </TreeView.InputBindings>
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add" Command="{Binding Project.AddFileToProjectCommand}" />
+                    <!--<MenuItem Header="Remove" Command="{Binding Project.RemoveFromProjectCommand}" CommandParameter="{Binding SelectedFile}" />-->
+                </ContextMenu>
+            </TreeView.ContextMenu>
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type vm:SignalViewModel}" >
+                    <StackPanel Orientation="Horizontal" MouseLeftButtonDown="TextBlock_MouseLeftButtonDown">
+                        <StackPanel.ToolTip>
+                            <ToolTip>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Description}" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Unit}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Native Name: " />
+                                        <TextBlock Text="{Binding Name}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ToolTip>
+                        </StackPanel.ToolTip>
+                        <TextBlock Text="{Binding Title}" Foreground="{Binding Foreground}"/>
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Export" Click="ExportSignalMenuItem_Click"/>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type vm:FileViewModel}" ItemsSource="{Binding SignalsFiltered}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding Path=Icon}" Width="16" Height="16" />
+                        <TextBlock Text="{Binding Path=Title}" />
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Show meta" Click="MetaMenuItem_Click"></MenuItem>
+                                <MenuItem Header="Export" Click="ExportMenuItem_Click"></MenuItem>
+                                <MenuItem Header="Remove from project" Command="{Binding ParentProject.RemoveFromProjectCommand, Mode=OneWay}" CommandParameter="{Binding}"/>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
+                        <StackPanel.InputBindings>
+                            <KeyBinding Command="{Binding ParentProject.RemoveFromProjectCommand}" CommandParameter="{Binding}" Key="Delete"/>
+                        </StackPanel.InputBindings>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+    </DockPanel>
+</UserControl>

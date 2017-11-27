@@ -1,0 +1,6 @@
+﻿Select Project>Add
+Select any file (Plugin will be the same anyway) in file explorer
+=>File and signals should show in Project panel
+Select View>Time plot
+=>New empty time plot should appear
+Drag and drop signal 1 and signal 2 to plot. 

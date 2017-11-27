@@ -1,0 +1,21 @@
+﻿<Window x:Class="Sample_Crunch.RangeForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sc="clr-namespace:Sample_Crunch"  
+        Title="Enter range" Height="176.358" Width="315.335">
+    <Window.Resources>
+        <sc:TimeToTextConverter x:Key="TimeToTextConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Label Content="From" Margin="10,10,0,0" HorizontalAlignment="Left" Width="38" Height="26" VerticalAlignment="Top"/>
+        <TextBox Height="23" Margin="10,14,10,0" Text="{Binding From}" IsEnabled="{Binding IsManualRange}" VerticalAlignment="Top" Grid.Column="1"/>
+        <Label Content="To" HorizontalAlignment="Left" Margin="10,46,0,0" VerticalAlignment="Top"/>
+        <TextBox Height="23" Margin="10,50,10,0" Text="{Binding To}" IsEnabled="{Binding IsManualRange}" VerticalAlignment="Top" Grid.Column="1"/>
+        <CheckBox Content="Auto Fit" HorizontalAlignment="Left" Margin="10,89,0,0" VerticalAlignment="Top" Grid.Column="1" ToolTip="If checked, the scale will automatically fit to the data." IsChecked="{Binding Auto}"/>
+        <Button Content="OK" Margin="0,0,9.8,10.4" Height="19" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Grid.Column="1" Click="OKButton_Click" IsDefault="True"/>
+    </Grid>
+</Window>
