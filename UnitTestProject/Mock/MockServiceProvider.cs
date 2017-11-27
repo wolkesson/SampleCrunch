@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Practices.ServiceLocation;
 
 namespace UnitTestProject.Mock
 {
-    class MockServiceProvider : CommonServiceLocator.IServiceLocator
+    class MockServiceProvider : IServiceLocator
     {
         public IEnumerable<object> GetAllInstances(Type serviceType)
         {

@@ -54,4 +54,4 @@ using System.Windows;
 [assembly: AssemblyVersion("0.1.0.0")]
 [assembly: AssemblyFileVersion("0.1.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
-[assembly:InternalsVisibleTo("UnitTestProject, PublicKey=00240000048000009400000006020000002400005253413100040000010001007f81af8e2af6b71d766658d72094f44d07d852dda66eb5b2068e395f8905c6f6f8f7d819ed12d20f439e7a2539c81484cd2aff830dd59e46e422ac20cfca66351a484566a94ff838cf375c1a4e79ae6badee0adbefc9014d263f1dba0d110b4b84c116df9cdc2edc2e82883d893a00ac985d93e2d777a94e9aa0ea384df782bb")]
+[assembly:InternalsVisibleTo("UnitTestProject")]
