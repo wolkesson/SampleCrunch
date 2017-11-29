@@ -30,11 +30,11 @@
         <TextBox TextWrapping="Wrap" Text="{Binding Time, Converter={StaticResource TimeToTextConverter}}" Grid.Column="1" Grid.Row="1" Style="{StaticResource Margin}" Height="18"/>
 
         <Label Content="Reference" Grid.Row="2" Style="{DynamicResource Margin}" />
-        <ComboBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" IsEnabled="{Binding References}" ItemsSource="{Binding References}" SelectedItem="{Binding File}" ToolTip="Select if this marker is related to the file or wall clock time. " Style="{StaticResource Margin}" Margin="65,9,0,9" />
+        <ComboBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" IsEnabled="{Binding HasFiles}" ItemsSource="{Binding References}" SelectedItem="{Binding File}" ToolTip="Select if this marker is related to the file or wall clock time. " Style="{StaticResource Margin}" Margin="65,9,0,9" />
 
         <CheckBox Content="Global" Grid.Column="1" ToolTip="If checked, marker will be shown in all plots" IsChecked="{Binding Global}" Visibility="Hidden" Grid.Row="2" Grid.RowSpan="2"/>
         <Button Content="OK" Margin="0,0,10,10" Height="19" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Grid.Column="1" Click="OKButton_Click" IsDefault="True" Grid.Row="4"/>
-        <RadioButton Content="Wall time" Grid.Column="1" Grid.Row="2" GroupName="TimeReference" IsChecked="{Binding Global}" Style="{StaticResource Margin}"/>
-        <RadioButton Content="File" Grid.Column="1" Grid.Row="3" GroupName="TimeReference" IsChecked="{Binding FileScope}" IsEnabled="{Binding HasFiles}" Style="{StaticResource Margin}"/>
+        <RadioButton Content="Wall time" Grid.Column="1" Grid.Row="2" GroupName="TimeReference" IsChecked="{Binding Global}" Style="{StaticResource Margin}" HorizontalAlignment="Left"/>
+        <RadioButton Content="File" Grid.Column="1" Grid.Row="3" GroupName="TimeReference" IsEnabled="{Binding HasFiles}" Style="{StaticResource Margin}" HorizontalAlignment="Left"/>
     </Grid>
 </Window>
