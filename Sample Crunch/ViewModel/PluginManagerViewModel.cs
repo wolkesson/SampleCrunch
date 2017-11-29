@@ -51,6 +51,12 @@
                     try
                     {
                         string pluginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sample Crunch Plugins");
+                        
+                        // Create directory if it does not exist
+                        if (!Directory.Exists(pluginPath)) {
+                            Directory.CreateDirectory(pluginPath);
+                        }
+
                         File.Copy(filename, Path.Combine(pluginPath, Path.GetFileName(filename)));
                     }
 
