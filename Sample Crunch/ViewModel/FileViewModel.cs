@@ -173,7 +173,7 @@ namespace Sample_Crunch.ViewModel
             {
                 if (fileData.SyncMark == null)
                 {
-                    return SyncMarkers.First();
+                    return SyncMarkers.DefaultIfEmpty(null).First();
                 }
                 else
                 {
