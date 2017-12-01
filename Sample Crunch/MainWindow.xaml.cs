@@ -42,9 +42,11 @@ namespace Sample_Crunch
             string pluginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sample Crunch Plugins");
             if (Directory.Exists(pluginPath))
             {
+                string dllName = "StandardPanels.dll";
+                File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, dllName), Path.Combine(pluginPath, dllName));
                 PluginFactory.LoadPlugins(pluginPath);
             }
-            PluginFactory.LoadPlugins(AppDomain.CurrentDomain.BaseDirectory);
+            //PluginFactory.LoadPlugins(AppDomain.CurrentDomain.BaseDirectory);
 
             try
             {

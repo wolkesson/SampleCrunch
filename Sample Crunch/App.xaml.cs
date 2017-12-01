@@ -2,15 +2,10 @@
 
 namespace Sample_Crunch
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Configuration;
-    using System.Data;
     using System.Diagnostics;
-    using System.Linq;
     using System.Threading;
-    using System.Threading.Tasks;
     using System.Windows;
+    using Squirrel;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -19,7 +14,7 @@ namespace Sample_Crunch
     {
         private const int MINIMUM_SPLASH_TIME = 1500; // Miliseconds   
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected async override void OnStartup(StartupEventArgs e)
         {
             // Show splash screen
             SplashScreen splash = new SplashScreen();
@@ -29,6 +24,19 @@ namespace Sample_Crunch
             // Start a stop watch   
             Stopwatch timer = new Stopwatch();
             timer.Start();
+
+            // Check for updates
+            try
+            {
+                using (var mgr = new UpdateManager("C:\\Users\\henwo_000\\Documents\\GitHub\\SampleCrunch\\Releases"))
+                {
+                    await mgr.UpdateApp();
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Automatic Update Failed");
+            }
 
             // Load your windows but don't show it yet   
             base.OnStartup(e);
