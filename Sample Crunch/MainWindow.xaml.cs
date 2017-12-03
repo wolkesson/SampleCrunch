@@ -38,13 +38,25 @@ namespace Sample_Crunch
         [SuppressMessage("Microsoft.Globalization", "CA1303")]
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Load plugins from programs folder and program data folder
-            string pluginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sample Crunch Plugins");
-            if (Directory.Exists(pluginPath))
+            try
             {
+                // Load plugins from programs folder and program data folder
+                string pluginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sample Crunch Plugins");
                 PluginFactory.LoadPlugins(pluginPath);
             }
-            PluginFactory.LoadPlugins(AppDomain.CurrentDomain.BaseDirectory);
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString() + Environment.NewLine + ex.InnerException?.Message);
+            }
+
+            try
+            {
+                PluginFactory.LoadPlugins(AppDomain.CurrentDomain.BaseDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString() + Environment.NewLine + ex.InnerException?.Message);
+            }
 
             try
             {

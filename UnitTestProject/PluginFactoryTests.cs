@@ -9,22 +9,52 @@ namespace UnitTestProject
     [TestClass]
     public class PluginFactoryTests
     {
+        private const string validPlugin = "StandardPanels.dll";
+        private const string invalidPlugin = "InvalidPlugin.dll";
         static string pluginPath;
 
         [ClassInitialize]
-        static void InstallPlugIn()
+        public static void ClassInitialize(TestContext testContext)
         {
-            pluginPath = AppDomain.CurrentDomain.BaseDirectory;
+            pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginTest");
+            Directory.CreateDirectory(pluginPath);
+            // Add valid plugin
+            File.Copy(validPlugin, Path.Combine(pluginPath, validPlugin));
         }
 
-        //[TestMethod]
-        //public void LoadPluginsForDlls()
-        //{
-        //    if (pluginPath == null) { InstallPlugIn(); }
-        //    PluginFactory.LoadPlugins(pluginPath);
-        //    Assert.IsTrue( PluginFactory.Parsers.Count >= 1,  "Expected one plugin at path " + pluginPath);
-        //    Assert.IsTrue(typeof(ILogFileParser).IsAssignableFrom(PluginFactory.Parsers[0]));
-        //}
+        [TestMethod]
+        public void LoadPluginsFromDlls()
+        {
+            PluginFactory.LoadPlugins(pluginPath);
+            Assert.IsTrue(PluginFactory.Parsers.Count >= 1, "Expected one plugin at path " + pluginPath);
+            Assert.IsTrue(typeof(ILogFileParser).IsAssignableFrom(PluginFactory.Parsers[0]));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(PluginFactory.PluginLoadException), "Plugin exception did not throw")]
+        public void InvalidPlugin()
+        {
+            StreamWriter sw = File.CreateText(Path.Combine(pluginPath, invalidPlugin));
+            sw.WriteLine("Not a valid dll!");
+            sw.Close();
+
+            try
+            {
+                PluginFactory.LoadPlugins(pluginPath);
+            }
+            catch (PluginFactory.PluginLoadException ex)
+            {
+                Assert.IsTrue(ex.ToString().Contains(invalidPlugin));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail("Unexpected exception" + ex.ToString());
+            }
+
+            // Verify that it continued
+            Assert.IsTrue(PluginFactory.Parsers.Count >= 1, "Expected one plugin at path " + pluginPath);
+        }
 
         //[TestMethod]
         //public void PluginName()
@@ -53,5 +83,17 @@ namespace UnitTestProject
         //    signals.ForEach((s) => actualSignalNames.Add(s.Name));
         //    CollectionAssert.AreEqual(expectedSignalNames, actualSignalNames, "Signal names are not as expected");
         //}
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            PluginFactory.Reset();
+        }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            Directory.Delete(pluginPath, true);
+        }
     }
 }
