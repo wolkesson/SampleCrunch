@@ -14,12 +14,13 @@ namespace UnitTestProject
     public class ProjectTest
     {
         const string filename = "testProject.scp";
+        static string pluginPath;
 
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext context)
         {
+            pluginPath = System.IO.Path.Combine(Environment.CurrentDirectory);
             // Init plugin reader
-            string pluginPath = System.IO.Path.Combine(Environment.CurrentDirectory);
             PluginFactory.LoadPlugins(pluginPath);
             if (File.Exists(filename))
             {
@@ -52,6 +53,8 @@ namespace UnitTestProject
         [ExpectedException(typeof(InvalidOperationException), "FileNotFound exception did not throw")]
         public void SaveAndOpenFailures()
         {
+            PluginFactory.Reset();
+            PluginFactory.LoadPlugins(pluginPath);
             Assert.IsFalse(File.Exists(filename), "Project file should not exist");
             ProjectData testProj = new ProjectData();
             testProj.Files.Add(new FileModel());
