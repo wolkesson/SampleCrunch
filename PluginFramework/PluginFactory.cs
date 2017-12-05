@@ -25,7 +25,7 @@ namespace PluginFramework
         /// Add plugins from path. Can be called multiple times to include several paths.
         /// </summary>
         /// <param name="pluginPath">The path to include plugins from.</param>
-        public static void LoadPlugins(string pluginPath)
+        public static List<Exception> LoadPlugins(string pluginPath)
         {
             if (!Directory.Exists(pluginPath))
             {
@@ -98,10 +98,7 @@ namespace PluginFramework
                 }
             } // End of file loop
 
-            foreach (var item in exList)
-            {
-                throw item;
-            }
+            return exList;
         }
 
         /// <summary>
