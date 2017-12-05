@@ -36,7 +36,7 @@ namespace Sample_Crunch
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303")]
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -46,12 +46,12 @@ namespace Sample_Crunch
 
                 foreach (var ex in errors)
                 {
-                    MessageBox.Show(ex.ToString() + Environment.NewLine + ex.InnerException?.Message);
+                    await MainViewModel.DialogService.ShowError(ex.InnerException, ex.Message, "Continue", null);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString() + Environment.NewLine + ex.InnerException?.Message);
+                await MainViewModel.DialogService.ShowError(ex.Message, "Cold not load plugins", "Continue", null);
             }
 
             try

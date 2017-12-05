@@ -10,6 +10,8 @@
 
     public class PluginManagerViewModel
     {
+        private string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+
         public IDialogServiceExt DialogService
         {
             get
@@ -49,9 +51,7 @@
                 foreach (var filename in dlg.FileNames)
                 {
                     try
-                    {
-                        string pluginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sample Crunch Plugins");
-                        
+                    {                        
                         // Create directory if it does not exist
                         if (!Directory.Exists(pluginPath)) {
                             Directory.CreateDirectory(pluginPath);
