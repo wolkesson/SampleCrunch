@@ -36,26 +36,22 @@ namespace Sample_Crunch
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303")]
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
                 // Load plugins from programs folder and program data folder
-                string pluginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Sample Crunch Plugins");
-                PluginFactory.LoadPlugins(pluginPath);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString() + Environment.NewLine + ex.InnerException?.Message);
-            }
+                string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                List<Exception> errors = PluginFactory.LoadPlugins(pluginPath);
 
-            try
-            {
-                PluginFactory.LoadPlugins(AppDomain.CurrentDomain.BaseDirectory);
+                foreach (var ex in errors)
+                {
+                    await MainViewModel.DialogService.ShowError(ex.InnerException, ex.Message, "Continue", null);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString() + Environment.NewLine + ex.InnerException?.Message);
+                await MainViewModel.DialogService.ShowError(ex.Message, "Cold not load plugins", "Continue", null);
             }
 
             try
@@ -84,6 +80,7 @@ namespace Sample_Crunch
             }
             finally
             { }
+
             // Add local factories which will not be found because they are not in dll's.
             PluginFactory.PanelFactorys.Add(PluginFactory.CreatePanelFactory(typeof(Factory.MarkerPanelFactory)));
             PluginFactory.PanelFactorys.Add(PluginFactory.CreatePanelFactory(typeof(Factory.ProjectPanelFactory)));

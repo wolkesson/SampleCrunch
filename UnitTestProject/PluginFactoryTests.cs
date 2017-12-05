@@ -31,7 +31,6 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        [ExpectedException(typeof(PluginFactory.PluginLoadException), "Plugin exception did not throw")]
         public void InvalidPlugin()
         {
             StreamWriter sw = File.CreateText(Path.Combine(pluginPath, invalidPlugin));
@@ -40,12 +39,9 @@ namespace UnitTestProject
 
             try
             {
-                PluginFactory.LoadPlugins(pluginPath);
-            }
-            catch (PluginFactory.PluginLoadException ex)
-            {
-                Assert.IsTrue(ex.ToString().Contains(invalidPlugin));
-                throw;
+                List<Exception> execptions = PluginFactory.LoadPlugins(pluginPath);
+                Assert.IsTrue(execptions.Count > 0, "Expect at least one error");
+                Assert.IsTrue(execptions[0].ToString().Contains(invalidPlugin));
             }
             catch (Exception ex)
             {
