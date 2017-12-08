@@ -25,17 +25,20 @@ namespace PluginFramework
         /// Add plugins from path. Can be called multiple times to include several paths.
         /// </summary>
         /// <param name="pluginPath">The path to include plugins from.</param>
-        public static void LoadPlugins(string pluginPath)
+        public static List<Exception> LoadPlugins(string pluginPath)
         {
             if (!Directory.Exists(pluginPath))
             {
                 throw new DirectoryNotFoundException("The plugin directory (" + Path.GetFullPath(pluginPath) + ") could not be found!");
             }
 
+            // Save any exception and continue loading next dll
+            List<Exception> exList = new List<Exception>();
             foreach (var dll in Directory.EnumerateFiles(pluginPath, "*.dll"))
             {
                 var domain = AppDomain.CurrentDomain;
                 domain.ReflectionOnlyAssemblyResolve += MyInterceptMethod;
+                string name = Path.GetFileName(dll);
                 try
                 {
                     Assembly nextAssembly = Assembly.Load(File.ReadAllBytes(dll));
@@ -78,19 +81,35 @@ namespace PluginFramework
                     Exception exL = ex.LoaderExceptions[0];
                     if (exL is TypeLoadException)
                     {
-                        string name = Path.GetFileName(dll);
-                        MessageBox.Show("Plugin " + name + " could not load! Please contact plugin author." + Environment.NewLine + exL.ToString());
+                        exList.Add(new PluginLoadException("Plugin " + name + " could not load! Please contact plugin author.", exL));
                     }
                     else
                     {
-                        throw ex.LoaderExceptions[0];
+                        exList.Add(new PluginLoadException("Plugin " + name + " could not load! Please contact plugin author.", ex.LoaderExceptions[0]));
                     }
+                }
+                catch (Exception ex)
+                {
+                    exList.Add(new PluginLoadException("Plugin " + name + " could not load! Please contact plugin author.", ex));
                 }
                 finally
                 {
                     domain.ReflectionOnlyAssemblyResolve -= MyInterceptMethod;
                 }
-            }
+            } // End of file loop
+
+            return exList;
+        }
+
+        /// <summary>
+        /// Resets the PluginFactory. Should olny be used in test classes.
+        /// </summary>
+        public static void Reset()
+        {
+            Info.Clear();
+            Parsers.Clear();
+            Analyzers.Clear();
+            PanelFactorys.Clear();
         }
 
         private static List<Type> modelTypes = new List<Type>();
@@ -106,6 +125,7 @@ namespace PluginFramework
         {
             if (!modelTypes.Contains(modelType)) modelTypes.Add(modelType);
         }
+
         public static List<PluginInfo> Info {get; private set;}
         public static List<Type> Parsers { get; private set; }
         public static List<Type> Analyzers { get; private set; }
@@ -250,6 +270,18 @@ namespace PluginFramework
                 Display,
                 Analyzer
             }
+        }
+
+
+        [Serializable]
+        public class PluginLoadException : Exception
+        {
+            public PluginLoadException() { }
+            public PluginLoadException(string message) : base(message) { }
+            public PluginLoadException(string message, Exception inner) : base(message, inner) { }
+            protected PluginLoadException(
+              System.Runtime.Serialization.SerializationInfo info,
+              System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
         }
     }
 }
