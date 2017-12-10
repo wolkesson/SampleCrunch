@@ -28,10 +28,14 @@ namespace Sample_Crunch
             // Check for updates
             try
             {
-                using (var mgr = new UpdateManager("C:\\Users\\henwo_000\\Documents\\GitHub\\SampleCrunch\\Releases"))
+                using (var mgr = UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
                 {
-                    await mgr.UpdateApp();
+                    await mgr.Result.UpdateApp();
                 }
+                //using (var mgr = new UpdateManager("C:\\Users\\henwo_000\\Documents\\GitHub\\SampleCrunch\\SampleCrunch\\Releases"))
+                //{
+                //    await mgr.UpdateApp();
+                //}
             }
             catch (System.Exception ex)
             {
