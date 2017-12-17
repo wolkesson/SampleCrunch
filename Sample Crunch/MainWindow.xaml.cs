@@ -40,8 +40,23 @@ namespace Sample_Crunch
         {
             try
             {
-                // Load plugins from programs folder and program data folder
+                // Load plugins from plugin directory
                 string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+
+                // Create plugin directory
+                if (!Directory.Exists(pluginPath))
+                {
+                    Directory.CreateDirectory(pluginPath);
+                }
+
+                //  Move standard panels dll to plugin directory
+                string standardPanelsTargetPath = Path.Combine(pluginPath, "StandardPanels.dll");
+                if (!File.Exists(standardPanelsTargetPath))
+                {
+                    string standardPanelsSourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StandardPanels.dll");
+                    File.Copy(standardPanelsSourcePath, standardPanelsTargetPath, true);
+                }
+
                 List<Exception> errors = PluginFactory.LoadPlugins(pluginPath);
 
                 foreach (var ex in errors)
