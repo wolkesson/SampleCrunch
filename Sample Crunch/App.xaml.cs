@@ -70,17 +70,18 @@ namespace Sample_Crunch
                     await mgr.DownloadReleases(new[] { lastVersion });
 
 #if DEBUG
-                    System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
-                }
+                        System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
+                    }
 #else
-            //await mgr.DownloadReleases(new[] {lastVersion});
-            await mgr.ApplyReleases(updates);
-            await mgr.UpdateApp();
+                    //await mgr.DownloadReleases(new[] {lastVersion});
+                    await mgr.ApplyReleases(updates);
+                    await mgr.UpdateApp();
 
-            System.Windows.Forms.MessageBox.Show("The application has been updated - please close and restart.");
-        }
+                    System.Windows.Forms.MessageBox.Show("The application has been updated - please close and restart.");
+                    mgr.CreateShortcutForThisExe();
+                }
 
-        UpdateManager.RestartApp();
+                UpdateManager.RestartApp();
 #endif
             }
             catch (Exception e)
