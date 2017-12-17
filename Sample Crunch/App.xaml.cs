@@ -32,7 +32,12 @@ namespace Sample_Crunch
 
             // Load your windows but don't show it yet   
             base.OnStartup(e);
+
+            // Create main window
             MainWindow main = new MainWindow();
+            MainWindow = main;
+            this.ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
+
             timer.Stop();
 
             int remainingTimeToShowSplash = MINIMUM_SPLASH_TIME - (int)timer.ElapsedMilliseconds;

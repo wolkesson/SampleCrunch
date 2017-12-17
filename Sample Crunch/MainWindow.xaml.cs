@@ -213,9 +213,9 @@ namespace Sample_Crunch
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
-            this.Close();
-
             ViewModel.ViewModelLocator.Cleanup();
+            this.Close();
+            App.Current.Shutdown();
         }
     }
 }
