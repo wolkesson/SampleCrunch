@@ -227,5 +227,12 @@ namespace Sample_Crunch
 
             main.SaveProjectCommand.Execute(null);
         }
+
+        private void Window_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ViewModelLocator.Cleanup();
+            this.Close();
+            App.Current.Shutdown();
+        }
     }
 }
