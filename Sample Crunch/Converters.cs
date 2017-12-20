@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
 namespace Sample_Crunch
 {
-    public class TimeToPositionConverter : System.Windows.Data.IMultiValueConverter
+    public class TimeToPositionConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -147,6 +144,27 @@ namespace Sample_Crunch
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException("This converter only works for one way binding");
+        }
+    }
+
+    public class MultiBooleanToVisibilityConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool visible = true;
+            foreach (object value in values)
+                if (value is bool)
+                    visible = visible && (bool)value;
+
+            if (visible)
+                return System.Windows.Visibility.Visible;
+            else
+                return System.Windows.Visibility.Hidden;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

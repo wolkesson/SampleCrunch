@@ -9,6 +9,7 @@ namespace Sample_Crunch
     using System.Linq;
     using System.Threading.Tasks;
     using System.Windows.Forms;
+    using GalaSoft.MvvmLight.Ioc;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -21,72 +22,30 @@ namespace Sample_Crunch
         {
             // Show splash screen
             SplashScreen splash = new SplashScreen();
-            splash.ShowCloseButton = false;
             splash.Show();
+            splash.Topmost = true;
 
-            // Start a stop watch   
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
+            // Note: This can not be done before splash because types are registered in ViewModelLocator
+            var upd = SimpleIoc.Default.GetInstance<ViewModel.UpdateViewModel>();
 
-            // Check for updates
+            // Check for updates async
             var updateTask = Task.Run(async () =>
             {
-                await UpdateApp();
+                await upd.CheckForUpdates(5000);
             });
 
             // Load your windows but don't show it yet   
             base.OnStartup(e);
             MainWindow main = new MainWindow();
-            timer.Stop();
 
-            int remainingTimeToShowSplash = MINIMUM_SPLASH_TIME - (int)timer.ElapsedMilliseconds;
-            if (remainingTimeToShowSplash > 0)
-                Thread.Sleep(remainingTimeToShowSplash);
+            updateTask.Wait(2000);
 
-            splash.Close();
-        }
-
-
-        public static async Task UpdateApp()
-        {
-            try
+            // Autoclose Splash if no update available
+            if (upd.CurrentState == ViewModel.UpdateViewModel.State.Failed ||
+                    upd.CurrentState == ViewModel.UpdateViewModel.State.NoUpdateAvailable ||
+                    upd.CurrentState == ViewModel.UpdateViewModel.State.Timedout)
             {
-                using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
-                {
-                    var updates = await mgr.CheckForUpdate();
-                    var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                    if (lastVersion == null)
-                    {
-                        System.Windows.Forms.MessageBox.Show("No Updates are available at this time.");
-                        return;
-                    }
-
-                    if (System.Windows.Forms.MessageBox.Show($"An update to version {lastVersion.Version} is available. Do you want to update?",
-                            "Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
-                    {
-                        return;
-                    }
-
-                    await mgr.DownloadReleases(new[] { lastVersion });
-
-#if DEBUG
-                        System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
-                    }
-#else
-                    //await mgr.DownloadReleases(new[] {lastVersion});
-                    await mgr.ApplyReleases(updates);
-                    await mgr.UpdateApp();
-
-                    System.Windows.Forms.MessageBox.Show("The application has been updated - please close and restart.");
-                    mgr.CreateShortcutForThisExe();
-                }
-
-                UpdateManager.RestartApp();
-#endif
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Update check failed with an exception: " + e.Message);
+                splash.Close();
             }
         }
     }

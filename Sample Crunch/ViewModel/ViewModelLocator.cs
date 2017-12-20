@@ -48,6 +48,7 @@ namespace Sample_Crunch.ViewModel
             }
             SimpleIoc.Default.Register<PluginManagerViewModel>();
             SimpleIoc.Default.Register<MainViewModel>();
+            SimpleIoc.Default.Register<UpdateViewModel>();
             SimpleIoc.Default.Register(() => SetupTelemetry(), true);
         }
 
@@ -64,6 +65,14 @@ namespace Sample_Crunch.ViewModel
             get
             {
                 return SimpleIoc.Default.GetInstance<PluginManagerViewModel>();
+            }
+        }
+
+        public static UpdateViewModel Updater
+        {
+            get
+            {
+                return SimpleIoc.Default.GetInstance<UpdateViewModel>();
             }
         }
 
