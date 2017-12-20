@@ -195,8 +195,10 @@ namespace Sample_Crunch
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            var upd = SimpleIoc.Default.GetInstance<ViewModel.UpdateViewModel>();
+            upd.CheckForUpdates(10000);
+
             SplashScreen splash = new SplashScreen();
-            splash.ShowCloseButton = true;
             splash.Show();
         }
 

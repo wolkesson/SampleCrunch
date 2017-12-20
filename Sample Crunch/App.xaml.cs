@@ -9,89 +9,49 @@ namespace Sample_Crunch
     using System.Linq;
     using System.Threading.Tasks;
     using System.Windows.Forms;
+    using GalaSoft.MvvmLight.Ioc;
 
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : System.Windows.Application
     {
-        private const int MINIMUM_SPLASH_TIME = 1500; // Miliseconds   
+        private const int MINIMUM_SPLASH_TIME = 2000; // Miliseconds   
+        private const int MAXIMUM_SPLASH_TIME = 5000; // Miliseconds  
 
         protected override void OnStartup(System.Windows.StartupEventArgs e)
         {
             // Show splash screen
             SplashScreen splash = new SplashScreen();
-            splash.ShowCloseButton = false;
             splash.Show();
+            splash.Topmost = true;
 
-            // Start a stop watch   
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
+            // Minimum delay so that splash does to disappera too quickly
+            var splashTask = Task.Delay(MINIMUM_SPLASH_TIME);
 
-            // Check for updates
+            // Note: This can not be done before splash loaded because types are registered in 
+            // ViewModelLocator which is loaded by splash (for example)
+            var upd = SimpleIoc.Default.GetInstance<ViewModel.UpdateViewModel>();
+
+            // Check for updates async
             var updateTask = Task.Run(async () =>
             {
-                await UpdateApp();
+                await upd.CheckForUpdates(MAXIMUM_SPLASH_TIME);
             });
 
-            // Load your windows but don't show it yet   
+            // Load main window
             base.OnStartup(e);
-
-            // Create main window
             MainWindow main = new MainWindow();
-            MainWindow = main;
-            this.ShutdownMode = System.Windows.ShutdownMode.OnExplicitShutdown;
 
-            timer.Stop();
+            // Total delay will be between MINIMUM_SPLASH_TIME and MAXIMUM_SPLASH_TIME
+            Task.WaitAll(updateTask, splashTask);
 
-            int remainingTimeToShowSplash = MINIMUM_SPLASH_TIME - (int)timer.ElapsedMilliseconds;
-            if (remainingTimeToShowSplash > 0)
-                Thread.Sleep(remainingTimeToShowSplash);
-
-            splash.Close();
-        }
-
-
-        public static async Task UpdateApp()
-        {
-            try
+            // Autoclose Splash if no updates are available
+            if (upd.CurrentState == ViewModel.UpdateViewModel.State.Failed ||
+                    upd.CurrentState == ViewModel.UpdateViewModel.State.NoUpdateAvailable ||
+                    upd.CurrentState == ViewModel.UpdateViewModel.State.Timedout)
             {
-                using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
-                {
-                    var updates = await mgr.CheckForUpdate();
-                    var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                    if (lastVersion == null)
-                    {
-                        System.Windows.Forms.MessageBox.Show("No Updates are available at this time.");
-                        return;
-                    }
-
-                    if (System.Windows.Forms.MessageBox.Show($"An update to version {lastVersion.Version} is available. Do you want to update?",
-                            "Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
-                    {
-                        return;
-                    }
-
-                    await mgr.DownloadReleases(new[] { lastVersion });
-
-#if DEBUG
-                        System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
-                    }
-#else
-                    //await mgr.DownloadReleases(new[] {lastVersion});
-                    await mgr.ApplyReleases(updates);
-                    await mgr.UpdateApp();
-
-                    System.Windows.Forms.MessageBox.Show("The application has been updated - please close and restart.");
-                    mgr.CreateShortcutForThisExe();
-                }
-
-                UpdateManager.RestartApp();
-#endif
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Update check failed with an exception: " + e.Message);
+                splash.Close();
             }
         }
     }

@@ -1,37 +1,111 @@
 ﻿<Window x:Class="Sample_Crunch.SplashScreen"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sc="clr-namespace:Sample_Crunch"
         Title="SplashScreen" Height="200" Width="500" 
         ResizeMode="NoResize" WindowStyle="None" WindowStartupLocation="CenterScreen" 
         BorderThickness="5" BorderBrush="AliceBlue"
-         DataContext="{Binding Main, Source={StaticResource Locator}}">
+        DataContext="{Binding Source={StaticResource Locator}}"
+        Background="#FF434343">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <sc:MultiBooleanToVisibilityConverter x:Key="AndConverter"/>
         <Color x:Key="DarkBackground">#FF434343</Color>
         <SolidColorBrush x:Key="DarkBrush" Color="{StaticResource DarkBackground }"></SolidColorBrush>
 
         <Style x:Key="LightTextStyle" TargetType="TextBlock">
-            <Setter Property="Foreground"          Value="White" />
-            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Margin" Value="10,0"/>
         </Style>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="165*"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="40*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
-        <Image Source="/Resources/SampleCrunchLogo.png" Margin="10" Grid.RowSpan="2" />
-        <StackPanel Orientation="Vertical" Grid.Column="1" Background="{StaticResource DarkBrush}" Grid.RowSpan="2">
-            <TextBlock Style="{StaticResource LightTextStyle}" Text="{Binding Title}" FontSize="22" FontWeight="Bold"></TextBlock>
-            <TextBlock Style="{StaticResource LightTextStyle}"><Run Text="Version: "></Run><Run Text="{Binding Version, Mode=OneTime}"></Run></TextBlock>
-            <TextBlock Style="{StaticResource LightTextStyle}" Text="The free generic log file analyzer."/>
-            <TextBlock Style="{StaticResource LightTextStyle}" Margin="10,0" Foreground="White" Text="Copyright © Henrik Wolkesson 2015-2016"/>
-        </StackPanel>
-        <Button x:Name="closeButton" Grid.Column="1" Grid.Row="1" Content="Close" Margin="150,0,10,10" Click="closeButton_Click"/>
+        <Canvas Background="White" Grid.RowSpan="7" >
+            <Image Source="/Resources/SampleCrunchLogo.png" Width="{Binding Parent.ActualWidth, Mode=OneWay, RelativeSource={RelativeSource Self}}" Height="{Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" />
+        </Canvas>
+        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="0" Text="{Binding Main.Title}" FontSize="22" FontWeight="Bold"></TextBlock>
+        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="1" Text="The free generic log file analyzer."/>
+        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="2"><Run Text="Version: "></Run><Run Text="{Binding Main.Version, Mode=OneTime}"></Run></TextBlock>
+        <TextBlock Grid.Column="1" Grid.Row="3" Foreground="White">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LightTextStyle}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Idle">
+                            <Setter Property="TextBlock.Text" Value="" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Checking">
+                            <Setter Property="TextBlock.Text" Value="Checking for updates..." />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="UpdateAvailable">
+                            <Setter Property="TextBlock.Text" Value="{Binding Updater.AvailableVersion, StringFormat={}Update Available: {0}}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="NoUpdateAvailable">
+                            <Setter Property="TextBlock.Text" Value="No updates available" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Downloading">
+                            <Setter Property="TextBlock.Text" Value="Downloading updates..." />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Installing">
+                            <Setter Property="TextBlock.Text" Value="Installing updates..." />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Installed">
+                            <Setter Property="TextBlock.Text" Value="Update installed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Timedout">
+                            <Setter Property="TextBlock.Text" Value="Update Failed. Check connection and retry later!" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Updater.CurrentState}" Value="Failed">
+                            <Setter Property="TextBlock.Text" Value="Update Failed. Check connection and retry later!" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <Button Grid.Column="1" Grid.Row="4" Margin="10,3" Content="Update" Command="{Binding Updater.UpdateCommand}" Background="#FFA6FF5D">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Visibility" Value="Hidden" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Updater.CurrentState}" Value="UpdateAvailable">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <Button x:Name="closeButton" Grid.Column="1" Grid.Row="5" Height="25" Width="130" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="closeButton_Click">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Content" Value="Close" />
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Updater.CurrentState}" Value="Checking">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Updater.CurrentState}" Value="UpdateAvailable">
+                            <Setter Property="Content" Value="Skip" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Updater.Updating}" Value="true">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </Window>
