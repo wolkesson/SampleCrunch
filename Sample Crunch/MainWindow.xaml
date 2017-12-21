@@ -12,7 +12,7 @@
                  xmlns:d1p1="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Loaded="Window_Loaded"
         Unloaded="Window_Unloaded"
-        Title="{Binding Title}" DataContext="{Binding Main, Source={StaticResource Locator}}">
+        Title="{Binding Title}" DataContext="{Binding Main, Source={StaticResource Locator}}" Icon="app.ico">
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Close" 
                     Executed="Execute_ExitCommand" 

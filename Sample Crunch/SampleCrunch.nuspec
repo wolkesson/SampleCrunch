@@ -4,10 +4,11 @@
         <id>SampleCrunch</id>
         <version>0.0.0.0</version>
         <title>Sample Crunch</title>
-        <authors>authors</authors>
+        <authors>Henrik Wolkesson</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>A free generic log analyzer</description>
         <copyright>Copyright 2017</copyright>
+        <iconUrl>https://raw.githubusercontent.com/wolkesson/SampleCrunch/master/Sample%20Crunch/Resources/app.ico</iconUrl>
     </metadata>
     <files>
 		<file src="*.*" target="lib\net45\" exclude="*.pdb;*.nupkg;*.vshost.*"/>
