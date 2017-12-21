@@ -79,6 +79,7 @@ namespace Sample_Crunch.ViewModel
         public static void Cleanup()
         {
             // TODO Clear the ViewModels
+            Updater.Cleanup();
             Main.Cleanup();
             CloseTelemetry();
         }

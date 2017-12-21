@@ -19,6 +19,15 @@ namespace Sample_Crunch.ViewModel
         {
         }
 
+        public override void Cleanup()
+        {
+            base.Cleanup();
+            if (manager != null)
+            {
+                manager.Dispose();
+            }
+        }
+
         public Task CheckForUpdates(int timeout)
         {
             var task = UpdateApp();
