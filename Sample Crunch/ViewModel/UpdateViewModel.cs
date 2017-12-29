@@ -5,6 +5,7 @@ using Microsoft.ApplicationInsights;
 using Squirrel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace Sample_Crunch.ViewModel
 
         public Task CheckForUpdates(int timeout)
         {
-            var task = UpdateApp();
+            var task = CheckForUpdate();
             
             return Task.Run(async () =>
             {
@@ -86,6 +87,8 @@ namespace Sample_Crunch.ViewModel
         private ICommand updateCommand;
         private ReleaseEntry lastVersion = null;
 
+        TelemetryClient telemetry = SimpleIoc.Default.GetInstance<TelemetryClient>();
+
         public ICommand UpdateCommand
         {
             get
@@ -110,8 +113,10 @@ namespace Sample_Crunch.ViewModel
 
             Updating = true;
             CurrentState = State.Checking;
+
             try
             {
+                Stopwatch watch = Stopwatch.StartNew();
 
                 var updates = await manager.CheckForUpdate();
                 var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
@@ -127,16 +132,23 @@ namespace Sample_Crunch.ViewModel
 
                 //manager.CreateShortcutForThisExe();
 
+                // Send Telemetry
+                MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
+                Dictionary<string, string> props = new Dictionary<string, string>();
+                props.Add("from", main.Version);
+                props.Add("to", this.lastVersion.Version.ToString());
+                Dictionary<string, double> metrics = new Dictionary<string, double>();
+                metrics.Add("Elapse", watch.ElapsedMilliseconds);
+                telemetry.TrackEvent("Updating", props, metrics);
+
                 CurrentState = State.Installed;
                 //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
                 UpdateManager.RestartApp();
 #endif
-
             }
             catch (Exception e)
             {
-                TelemetryClient cl = SimpleIoc.Default.GetInstance<TelemetryClient>();
-                cl.TrackException(e);
+                telemetry.TrackException(e);
                 CurrentState = State.Failed;
             }
             finally
@@ -145,7 +157,7 @@ namespace Sample_Crunch.ViewModel
             }
         }
 
-        public async Task UpdateApp()
+        private async Task CheckForUpdate()
         {
             try
             {

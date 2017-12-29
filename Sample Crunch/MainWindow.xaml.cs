@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using GalaSoft.MvvmLight.Ioc;
 using Microsoft.ApplicationInsights;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace Sample_Crunch
 {
@@ -18,7 +20,7 @@ namespace Sample_Crunch
     /// </summary>
     public partial class MainWindow : Window
     {
-        
+
         public MainWindow()
         {
             try
@@ -36,6 +38,7 @@ namespace Sample_Crunch
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303")]
+        [SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             try
@@ -67,41 +70,14 @@ namespace Sample_Crunch
             catch (Exception ex)
             {
                 await MainViewModel.DialogService.ShowError(ex.Message, "Cold not load plugins", "Continue", null);
+                Telemetry.TrackException(new Microsoft.ApplicationInsights.DataContracts.ExceptionTelemetry(ex));
             }
-
-            try
-            {
-                // Log Parsers
-                Dictionary<string, string> parsers = new Dictionary<string, string>();
-                foreach (Type parserType in PluginFactory.Parsers)
-                {
-                    ParserPluginAttribute attr = parserType.GetCustomAttribute<ParserPluginAttribute>(false);
-                    if (attr != null)
-                    {
-                        parsers.AddUnique(attr.Title, attr.FileType);
-                    }
-                }
-                Telemetry.TrackTrace("Plugins: Parsers", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, parsers);
-
-                // Log Panels
-                Dictionary<string, string> panels = new Dictionary<string, string>();
-                PluginFactory.PanelFactorys.ForEach((str) => { panels.AddUnique(str.ToString(), str.Title); });
-                Telemetry.TrackTrace("Plugins: Panels", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, panels);
-
-                // Log Analysers
-                Dictionary<string, string> analysers = new Dictionary<string, string>();
-                PluginFactory.Analyzers.ForEach((str) => { analysers.AddUnique(str.ToString(), ""); });
-                Telemetry.TrackTrace("Plugins: Analyzers", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, analysers);
-            }
-            finally
-            { }
 
             // Add local factories which will not be found because they are not in dll's.
             PluginFactory.PanelFactorys.Add(PluginFactory.CreatePanelFactory(typeof(Factory.MarkerPanelFactory)));
             PluginFactory.PanelFactorys.Add(PluginFactory.CreatePanelFactory(typeof(Factory.ProjectPanelFactory)));
-            
-            MainViewModel.PropertyChanged += Main_PropertyChanged;
 
+            MainViewModel.PropertyChanged += Main_PropertyChanged;
 
             foreach (var item in PluginFactory.PanelFactorys)
             {
@@ -145,6 +121,50 @@ namespace Sample_Crunch
             {
                 // We will end up here if application is not installed, but run locally. 
             }
+
+            // Send telemetry async
+            Task.Factory.StartNew(() => SendConfigurationTelemetry()); // No reason to await this
+        }
+
+        private void SendConfigurationTelemetry()
+        {
+            // Send Telemetry data to Application Insight. This is used to priorities the work forward.
+            // Data sent in Custom data is put in a dDictionary<string,string> as follows
+            // "Parsers"    Title1 (filetype1), Title2 (filetype2), ...
+            // "Panels"     Title1 (classname1), Title2 (classname2), ... 
+            // "Analyzers"  Title1, Title2, ...
+            try
+            {
+                Dictionary<string, string> props = new Dictionary<string, string>();
+                StringBuilder sb = new StringBuilder();
+
+                // Log Parsers
+                foreach (Type parserType in PluginFactory.Parsers)
+                {
+                    ParserPluginAttribute attr = parserType.GetCustomAttribute<ParserPluginAttribute>(false);
+                    if (attr != null)
+                    {
+                        sb.AppendFormat("{0} ({1}), ", attr.Title, attr.FileType);
+                    }
+                }
+                props.Add("Parsers", sb.ToString());
+                sb.Clear();
+
+                // Log Panels
+                PluginFactory.PanelFactorys.ForEach((str) => { sb.AppendFormat("{0} ({1}), ", str.Title, str.ToString()); });
+                props.Add("Panels", sb.ToString());
+                sb.Clear();
+
+                // Log Analysers
+                PluginFactory.Analyzers.ForEach((str) => { sb.AppendFormat("{0}, ", str.ToString()); });
+                props.Add("Analyzers", sb.ToString());
+                sb.Clear();
+
+                // Send it
+                Telemetry.TrackTrace("Plugins", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, props);
+            }
+            finally
+            { }
         }
 
         private void UnhandledceptionHandler(object sender, UnhandledExceptionEventArgs e)
@@ -166,7 +186,7 @@ namespace Sample_Crunch
                 if (main.Project.ProjectModel.Layout == null) return;
 
                 using (var stream = new StringReader(main.Project.ProjectModel.Layout))
-                { 
+                {
                     // Must create a new deseriaizer every call because otherwise data lingers inside
                     XmlLayoutSerializer dockingSerializer = new XmlLayoutSerializer(dockingManager);
                     dockingSerializer.Deserialize(stream);
@@ -214,7 +234,7 @@ namespace Sample_Crunch
         {
             MainViewModel.DialogService.ShowWebPage("What's new", @"Resources/ChangeLog.html");
         }
-        
+
         private void SaveProjectMenuItem_Click(object sender, RoutedEventArgs e)
         {
             ViewModel.MainViewModel main = SimpleIoc.Default.GetInstance<ViewModel.MainViewModel>();
