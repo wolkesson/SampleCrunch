@@ -25,20 +25,9 @@ namespace Sample_Crunch
                 append = "_" + index.ToString();
                 goto retry;
             }
-
             dictionary.Add(newKey + append, newValue);
         }
 
-        public static void MergeKeys(this Dictionary<string, string> dictionary, string key, string value)
-        {
-            if (dictionary.ContainsKey(key))
-            {
-                dictionary[key] += ", " + value;
-            }
-            else
-            {
-                dictionary.Add(key, value);
-            }
-        }
     }
+
 }
