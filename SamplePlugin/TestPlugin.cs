@@ -45,7 +45,7 @@ namespace SamplePlugins
         public DateTime Origo
         {
             get;
-            set;
+            private set;
         }
 
         public SignalList Signals
