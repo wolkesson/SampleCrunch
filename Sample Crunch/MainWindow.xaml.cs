@@ -74,12 +74,12 @@ namespace Sample_Crunch
             }
 
             // Add local factories which will not be found because they are not in dll's.
-            PluginFactory.PanelFactorys.Add(PluginFactory.CreatePanelFactory(typeof(Factory.MarkerPanelFactory)));
-            PluginFactory.PanelFactorys.Add(PluginFactory.CreatePanelFactory(typeof(Factory.ProjectPanelFactory)));
+            PluginFactory.PanelFactories.Add(PluginFactory.CreatePanelFactory(typeof(Factory.MarkerPanelFactory)));
+            PluginFactory.PanelFactories.Add(PluginFactory.CreatePanelFactory(typeof(Factory.ProjectPanelFactory)));
 
             MainViewModel.PropertyChanged += Main_PropertyChanged;
 
-            foreach (var item in PluginFactory.PanelFactorys)
+            foreach (var item in PluginFactory.PanelFactories)
             {
                 // Add if it has no attribute set or if the attribute is set check the visible flag
                 PanelPluginAttribute attr = item.GetType().GetCustomAttribute<PanelPluginAttribute>(false);
@@ -139,9 +139,9 @@ namespace Sample_Crunch
                 StringBuilder sb = new StringBuilder();
 
                 // Log Parsers
-                foreach (Type parserType in PluginFactory.Parsers)
+                foreach (IParserFactory parser in PluginFactory.ParserFactories)
                 {
-                    ParserPluginAttribute attr = parserType.GetCustomAttribute<ParserPluginAttribute>(false);
+                    ParserPluginAttribute attr = parser.GetType().GetCustomAttribute<ParserPluginAttribute>(false);
                     if (attr != null)
                     {
                         sb.AppendFormat("{0} ({1}), ", attr.Title, attr.FileType);
@@ -151,7 +151,7 @@ namespace Sample_Crunch
                 sb.Clear();
 
                 // Log Panels
-                PluginFactory.PanelFactorys.ForEach((str) => { sb.AppendFormat("{0} ({1}), ", str.Title, str.ToString()); });
+                PluginFactory.PanelFactories.ForEach((str) => { sb.AppendFormat("{0} ({1}), ", str.Title, str.ToString()); });
                 props.Add("Panels", sb.ToString());
                 sb.Clear();
 

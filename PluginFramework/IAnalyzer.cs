@@ -4,6 +4,6 @@ namespace PluginFramework
 {
     public interface IAnalyzer
     {
-        Dictionary<string, object> Analyze(ILogFile logfile);
+        Dictionary<string, object> Analyze(IParser logfile);
     }
 }

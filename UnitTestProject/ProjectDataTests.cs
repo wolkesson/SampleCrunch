@@ -82,7 +82,7 @@ namespace UnitTestProject
             //SimpleIoc.Default.Register<TelemetryClient>(()=> new TelemetryClient());
             ProjectData testProj = new ProjectData();
             ProjectViewModel projVM = new ProjectViewModel(testProj);
-            ILogFileParser lfp = PluginFactory.CreateLogFileParser(typeof(csvParser));
+            IParserFactory lfp = PluginFactory.CreateParserFactory(typeof(CsvParserFactory));
             
             testProj.Files.Add(MockAddFile(@"TestData/data.csv", lfp));
             testProj.Save(filename);
@@ -92,7 +92,7 @@ namespace UnitTestProject
             Assert.AreEqual<int>(testProj.Files.Count, openedProj.Files.Count, "Invalid number of files");
         }
 
-        private FileModel MockAddFile(string filename, ILogFileParser parser)
+        private FileModel MockAddFile(string filename, IParserFactory parser)
         {
             FileModel file = new FileModel();
             file.FileName = filename;

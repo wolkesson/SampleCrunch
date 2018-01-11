@@ -303,7 +303,7 @@ namespace Sample_Crunch.ViewModel
                 try
                 {
                     // All files
-                    if (dlg.FilterIndex == PluginFactory.Parsers.Count+1)
+                    if (dlg.FilterIndex == PluginFactory.ParserFactories.Count+1)
                     {
                         foreach (var filename in dlg.FileNames)
                         {
@@ -312,7 +312,7 @@ namespace Sample_Crunch.ViewModel
                     }
                     else
                     {
-                        ILogFileParser lfp = PluginFactory.CreateLogFileParser(PluginFactory.Parsers[dlg.FilterIndex-1]);
+                        IParserFactory lfp = PluginFactory.ParserFactories[dlg.FilterIndex-1];
                         foreach (var filename in dlg.FileNames)
                         {
                             this.AddLogFile(filename, lfp);
@@ -328,7 +328,7 @@ namespace Sample_Crunch.ViewModel
             }
         }
 
-        public void AddLogFile(string filename, ILogFileParser parser)
+        public void AddLogFile(string filename, IParserFactory parser)
         {
             FileModel file = new FileModel();
             file.FileName = filename;
@@ -361,7 +361,7 @@ namespace Sample_Crunch.ViewModel
 
         public void AddLogFile(string filename)
         {
-            ILogFileParser lfp = PluginFactory.FindLogFileParser(filename);
+            IParserFactory lfp = PluginFactory.FindLogFileParser(filename);
             if (lfp != null)
             {
                 AddLogFile(filename, lfp);

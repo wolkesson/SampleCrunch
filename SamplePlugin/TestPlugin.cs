@@ -1,24 +1,19 @@
 ﻿using PluginFramework;
 using System;
-using System.Collections.Generic;
 
 namespace SamplePlugins
 {
     [ParserPlugin("Test Plugin", "Log File | *.dat")]
-    public class TestPlugin : ILogFileParser
+    public class TestPlugin : IParserFactory
     {
-        public TestPlugin()
-        {
-        }
-
         public bool CanOpen(string filename)
         {
             return !string.IsNullOrWhiteSpace(filename);
         }
 
-        public ILogFile Open(string fileName, ParserSettings settings = null)
+        public IParser Open(string fileName, ParserSettings settings = null)
         {
-            return (ILogFile)new TestLogFile(fileName);
+            return (IParser)new TestLogFile(fileName);
         }
 
         public bool ShowSettingsDialog(string fileName, ref ParserSettings settings)
@@ -27,9 +22,10 @@ namespace SamplePlugins
         }
     }
 
-    class TestLogFile:ILogFile
+    class TestLogFile:IParser
     {
         static private int instance = 0;
+        const int sampleTime = 40;
 
         public TestLogFile(string fileName)
         {
@@ -43,18 +39,7 @@ namespace SamplePlugins
 
             this.Origo = new DateTime(2015, 08, 10,13,11,3).AddMinutes(instance);
             this.Length = TimeSpan.FromHours(3);
-            this.SampleTime = 40;
             instance++;
-        }
-
-        public Dictionary<string, object> ComputedSignals
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public void ComputeData()
-        {
-            throw new NotImplementedException();
         }
 
         public DateTime Origo
@@ -71,28 +56,23 @@ namespace SamplePlugins
 
         public Sample[] ReadSignal(Signal signal)
         {
-            return ReadSignal(signal.UID);
-        }
-
-        public Sample[] ReadSignal(int uid)
-        {
-            Sample[] returnSample = new Sample[(int)(this.Length.TotalMilliseconds / SampleTime)];
+            Sample[] returnSample = new Sample[(int)(this.Length.TotalMilliseconds / sampleTime)];
                 DateTime t = Origo;
 
-            switch (uid)
+            switch (signal.UID)
             {
                 case 10:
                     for (long i = 0; i < returnSample.LongLength; i++)
                     {
                         returnSample[i] = new Sample() { Time = t, Value = Math.Sin(t.Ticks * 0.00000002) * 0.01 + 58 };
-                        t = t.AddMilliseconds(SampleTime);
+                        t = t.AddMilliseconds(sampleTime);
                     }
                     break;
                 case 11:
                     for (long i = 0; i < returnSample.LongLength; i++)
                     {
                         returnSample[i] = new Sample() { Time = t, Value = Math.Cos(t.Ticks * 0.00000002) * 0.01 + 15 };
-                        t = t.AddMilliseconds(SampleTime);
+                        t = t.AddMilliseconds(sampleTime);
                     }
                     break;
                 default:
@@ -100,34 +80,17 @@ namespace SamplePlugins
                     for (long i = 0; i < returnSample.LongLength; i++)
                     {
                         returnSample[i] = new Sample() { Time = t, Value = rnd.NextDouble() };
-                        t = t.AddMilliseconds(SampleTime);
+                        t = t.AddMilliseconds(sampleTime);
                     }
                     break;
             }
             return returnSample;
         }
 
-        public double SampleTime
-        {
-            get;
-            private set;
-        }
-
         public TimeSpan Length
         {
             get;
             private set;
-        }
-
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public Sample[] ReadSignal(string signalName)
-        {
-            return ReadSignal(0);
         }
     }
 }

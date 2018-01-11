@@ -3,13 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sample_Crunch.StandardPanels
 {
-    public class CSVFile : ILogFile, IDisposable
+    public class CsvFile : IParser, IDisposable
     {
         private readonly string fileName;
         private readonly MemoryMappedFile file;
@@ -19,7 +16,7 @@ namespace Sample_Crunch.StandardPanels
         private char splitChar = ';';
         private DateTime[] timeVector;
 
-        public CSVFile(string filename, ParserSettings settings)
+        public CsvFile(string filename, ParserSettings settings)
         {
             splitChar = (char)settings.Read("Delimiter");
             timeColumn = (int) settings.Read("TimeVector");
@@ -136,38 +133,24 @@ namespace Sample_Crunch.StandardPanels
             return samples.ToArray();
         }
 
-        public void Close()
+        public void Dispose()
         {
             fs.Close();
             file.Dispose();
         }
-
-        public void Dispose()
-        {
-            this.Close();
-        }
-
     }
 
     [ParserPlugin("CSV Plugin", "CSV File | *.csv")]
-    public class csvParser : ILogFileParser
-    {
-        private readonly List<IAnalyzer> analyzers = new List<IAnalyzer>();
-
-        public csvParser()
-        {
-        }
-
-        public string MetaData { get; set; }
-        
+    public class CsvParserFactory : IParserFactory
+    {        
         public bool CanOpen(string filename)
         {
             return (Path.GetExtension(filename) == ".csv");
         }
 
-        public ILogFile Open(string filename, ParserSettings settings = null)
+        public IParser Open(string filename, ParserSettings settings = null)
         {
-            return new CSVFile(filename, settings);
+            return new CsvFile(filename, settings);
         }
 
         public bool ShowSettingsDialog(string filename, ref ParserSettings settings)
@@ -188,11 +171,6 @@ namespace Sample_Crunch.StandardPanels
             }
 
             return false;
-        }
-
-        public List<IAnalyzer> Analyzers
-        {
-            get { return this.analyzers; }
         }
     }
 }
