@@ -22,7 +22,7 @@ namespace SamplePlugins
         }
     }
 
-    class TestLogFile:IParser
+    class TestLogFile : IParser
     {
         static private int instance = 0;
         const int sampleTime = 40;
@@ -30,14 +30,14 @@ namespace SamplePlugins
         public TestLogFile(string fileName)
         {
             this.Signals = new SignalList();
-            this.Signals.Add(new Signal() { Name = "Signal 1",  });
-            this.Signals.Add(new Signal() { Name = "Signal 2"});
+            this.Signals.Add(new Signal() { Name = "Signal 1" });
+            this.Signals.Add(new Signal() { Name = "Signal 2" });
             this.Signals.Add(new Signal() { Name = "Strange letters: ~Åäö /" });
 
-            this.Signals.Add(new Signal() { Name = "Longitude", Unit="deg", Tag = "Longitude", UID= 10 });
-            this.Signals.Add(new Signal() { Name = "Latitude" , Unit="deg", Tag = "Latitude", UID =11 });
+            this.Signals.Add(new Signal() { Name = "Longitude", Unit = "deg", Tag = "Longitude", UID = 10 });
+            this.Signals.Add(new Signal() { Name = "Latitude", Unit = "deg", Tag = "Latitude", UID = 11 });
 
-            this.Origo = new DateTime(2015, 08, 10,13,11,3).AddMinutes(instance);
+            this.Origo = new DateTime(2015, 08, 10, 13, 11, 3).AddMinutes(instance);
             this.Length = TimeSpan.FromHours(3);
             instance++;
         }
@@ -57,7 +57,7 @@ namespace SamplePlugins
         public Sample[] ReadSignal(Signal signal)
         {
             Sample[] returnSample = new Sample[(int)(this.Length.TotalMilliseconds / sampleTime)];
-                DateTime t = Origo;
+            DateTime t = Origo;
 
             switch (signal.UID)
             {
