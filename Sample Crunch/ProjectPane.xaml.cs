@@ -151,7 +151,7 @@ namespace Sample_Crunch
                 {
                     try
                     {
-                        ILogFileParser lfp = PluginFactory.FindLogFileParser(filename);
+                        IParserFactory lfp = PluginFactory.FindLogFileParser(filename);
                         if (lfp != null)
                         {
                             e.Effects = DragDropEffects.Copy;

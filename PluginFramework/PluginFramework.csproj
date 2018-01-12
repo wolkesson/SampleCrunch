@@ -77,8 +77,8 @@
     <Compile Include="IDialogServiceExtcs.cs" />
     <Compile Include="IFileModel.cs" />
     <Compile Include="IFileViewModel.cs" />
-    <Compile Include="ILogFile.cs" />
-    <Compile Include="ILogFileParser.cs" />
+    <Compile Include="SignalList.cs" />
+    <Compile Include="IParserFactory.cs" />
     <Compile Include="IMarkerModel.cs" />
     <Compile Include="IMarkerViewModel.cs" />
     <Compile Include="IPanel.cs" />

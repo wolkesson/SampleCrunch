@@ -13,7 +13,7 @@ namespace Sample_Crunch.ViewModel
     {
         Signal signal;
         SolidColorBrush foreground = Brushes.Black;
-        ILogFile logFile;
+        IParser logFile;
 
         public SignalViewModel(FileViewModel parentFileModel, Signal signal)
         {

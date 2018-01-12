@@ -16,9 +16,9 @@ namespace PluginFramework
         static PluginFactory()
         {
             Info = new List<PluginInfo>();
-            Parsers = new List<Type>();
+            ParserFactories = new List<IParserFactory>();
             Analyzers = new List<Type>();
-            PanelFactorys = new List<IPanelFactory>();
+            PanelFactories = new List<IPanelFactory>();
         }
 
         /// <summary>
@@ -48,9 +48,10 @@ namespace PluginFramework
                     {
                         foreach (var item in type.GetInterfaces())
                         {
-                            if (item.Name == nameof(ILogFileParser) && !type.IsGenericType && !type.IsInterface)
+                            if (item.Name == nameof(IParserFactory) && !type.IsGenericType && !type.IsInterface)
                             {
-                                Parsers.Add(type);
+                                IParserFactory factory = PluginFactory.CreateParserFactory(type);
+                                ParserFactories.Add(factory);
 
                                 ParserPluginAttribute attr = type.GetCustomAttribute<ParserPluginAttribute>(false);
                                 if (attr != null)
@@ -67,7 +68,7 @@ namespace PluginFramework
                             else if (item.Name == nameof(IPanelFactory) && !type.IsGenericType && !type.IsInterface)
                             {
                                 IPanelFactory factory = PluginFactory.CreatePanelFactory(type);
-                                PanelFactorys.Add(factory);
+                                PanelFactories.Add(factory);
                                 info.AddItem(new PluginInfo.ItemInfo() { Name = factory.Title, Type = PluginInfo.ItemType.Display });
                             }
                         }
@@ -81,7 +82,7 @@ namespace PluginFramework
                     Exception exL = ex.LoaderExceptions[0];
                     if (exL is TypeLoadException)
                     {
-                        exList.Add(new PluginLoadException("Plugin " + name + " could not load! Please contact plugin author.", exL));
+                        exList.Add(new PluginLoadException("Plugin " + name + " could not load from " + pluginPath + "! Please contact plugin author.", exL));
                     }
                     else
                     {
@@ -107,15 +108,15 @@ namespace PluginFramework
         public static void Reset()
         {
             Info.Clear();
-            Parsers.Clear();
+            ParserFactories.Clear();
             Analyzers.Clear();
-            PanelFactorys.Clear();
+            PanelFactories.Clear();
         }
 
         private static List<Type> modelTypes = new List<Type>();
         public static Type[] GetModelTypes()
         {
-            var types = from item in PluginFactory.PanelFactorys select item.ModelType;
+            var types = from item in PluginFactory.PanelFactories select item.ModelType;
             var list = types.ToList<Type>();
             list.AddRange(modelTypes);
             return list.ToArray<Type>();
@@ -127,18 +128,18 @@ namespace PluginFramework
         }
 
         public static List<PluginInfo> Info {get; private set;}
-        public static List<Type> Parsers { get; private set; }
+        public static List<IParserFactory> ParserFactories { get; private set; }
         public static List<Type> Analyzers { get; private set; }
-        public static List<IPanelFactory> PanelFactorys { get; private set; }
+        public static List<IPanelFactory> PanelFactories { get; private set; }
 
         public static string FileFilterString
         {
             get
             {
                 List<string> fileFilter = new List<string>();
-                foreach (Type type in Parsers)
+                foreach (IParserFactory type in ParserFactories)
                 {
-                    ParserPluginAttribute attr = type.GetCustomAttribute<ParserPluginAttribute>(false);
+                    ParserPluginAttribute attr = type.GetType().GetCustomAttribute<ParserPluginAttribute>(false);
                     if (attr != null)
                     {
                         fileFilter.Add(attr.FileType);
@@ -151,9 +152,9 @@ namespace PluginFramework
             }
         }
 
-        public static ILogFileParser CreateLogFileParser(Type type)
+        public static IParserFactory CreateParserFactory(Type type)
         {
-            ILogFileParser plugin = (ILogFileParser)Activator.CreateInstance(type);
+            IParserFactory plugin = (IParserFactory)Activator.CreateInstance(type);
             return plugin;
         }
 
@@ -169,23 +170,18 @@ namespace PluginFramework
             return factory;
         }
 
-        public static Type FindParser(string typename)
+        public static IParserFactory FindParser(string typename)
         {
-            foreach (var item in Parsers)
-            {
-                if (item.FullName == typename)
-                    return item;
-            }
+            var ret = from item in ParserFactories where item.GetType().FullName == typename select item;
 
-            return null;
+            return ret.FirstOrDefault();
         }
 
-        public static ILogFileParser FindLogFileParser(string filename)
+        public static IParserFactory FindLogFileParser(string filename)
         {
-            ILogFileParser suggestedLogFileParser = null;
-            foreach (Type pluginType in PluginFactory.Parsers)
+            IParserFactory suggestedLogFileParser = null;
+            foreach (IParserFactory tmpParser in PluginFactory.ParserFactories)
             {
-                ILogFileParser tmpParser = PluginFactory.CreateLogFileParser(pluginType);
                 if (tmpParser.CanOpen(filename))
                 {
                     suggestedLogFileParser = tmpParser;
@@ -221,15 +217,9 @@ namespace PluginFramework
 
         public static IPanelFactory FindPanelFactory(IPanelModel model)
         {
-            var ret = from item in PanelFactorys where item.GetType().FullName == model.FactoryReference select item;
+            var ret = from item in PanelFactories where item.GetType().FullName == model.FactoryReference select item;
 
             return ret.FirstOrDefault();
-        }
-
-        public static ParserPluginAttribute GetPluginAttribute(string typename)
-        {
-            Type pluginType = FindParser(typename);
-            return pluginType.GetCustomAttribute<ParserPluginAttribute>(false);
         }
 
         private static Assembly MyInterceptMethod(object sender, ResolveEventArgs e)

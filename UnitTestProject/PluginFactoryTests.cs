@@ -4,11 +4,12 @@ using PluginFramework;
 using System.IO;
 using System.Collections.Generic;
 
-namespace UnitTestProject
+namespace PluginFramework.Tests
 {
-    [TestClass]
+    [TestClass()]
     public class PluginFactoryTests
     {
+
         private const string validPlugin = "StandardPanels.dll";
         private const string invalidPlugin = "InvalidPlugin.dll";
         static string pluginPath;
@@ -18,16 +19,129 @@ namespace UnitTestProject
         {
             pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginTest");
             Directory.CreateDirectory(pluginPath);
+
             // Add valid plugin
-            File.Copy(validPlugin, Path.Combine(pluginPath, validPlugin));
+            File.Copy(validPlugin, Path.Combine(pluginPath, validPlugin),true);
         }
 
-        [TestMethod]
-        public void LoadPluginsFromDlls()
+        [TestMethod()]
+        public void LoadPluginsTest()
         {
             PluginFactory.LoadPlugins(pluginPath);
-            Assert.IsTrue(PluginFactory.Parsers.Count >= 1, "Expected one plugin at path " + pluginPath);
-            Assert.IsTrue(typeof(ILogFileParser).IsAssignableFrom(PluginFactory.Parsers[0]));
+
+            Assert.IsTrue(PluginFactory.Info.Count >= 1, "Expected one info at path " + pluginPath);
+            Assert.IsTrue(PluginFactory.ParserFactories.Count >= 1, "Expected one parser at path " + pluginPath);
+            Assert.IsTrue(PluginFactory.PanelFactories.Count >= 1, "Expected one panel at path " + pluginPath);
+        }
+
+        [TestMethod()]
+        public void ResetTest()
+        {
+            LoadPluginsTest();
+
+            var expectedInfo = PluginFactory.Info;
+            var expectedParsers = PluginFactory.ParserFactories;
+            var expectedPanels = PluginFactory.PanelFactories;
+
+            PluginFactory.Reset();
+
+            Assert.IsTrue(PluginFactory.Info.Count == 0, "Expected info to be empty after reset");
+            Assert.IsTrue(PluginFactory.ParserFactories.Count == 0, "Expected Parsers to be empty after reset");
+            Assert.IsTrue(PluginFactory.PanelFactories.Count == 0, "Expected Panels to be empty after reset");
+
+            LoadPluginsTest();
+
+            CollectionAssert.AreEqual(expectedInfo, PluginFactory.Info);
+            CollectionAssert.AreEqual(expectedParsers, PluginFactory.ParserFactories);
+            CollectionAssert.AreEqual(expectedPanels, PluginFactory.PanelFactories);
+        }
+
+        [TestMethod()]
+        public void GetModelTypesTest()
+        {
+            PluginFactory.LoadPlugins(pluginPath);
+            var actual = PluginFactory.GetModelTypes();
+            Assert.IsTrue(actual.Length >= 1);
+        }
+
+        [TestMethod()]
+        public void RegisterModelTypeTest()
+        {
+            PluginFactory.LoadPlugins(pluginPath);
+
+            var beforeLength = PluginFactory.GetModelTypes().Length;
+            PluginFactory.RegisterModelType(typeof(PluginFactoryTests));
+
+            var actual = PluginFactory.GetModelTypes();
+            CollectionAssert.Contains(actual, typeof(PluginFactoryTests));
+            Assert.IsTrue(actual.Length == beforeLength + 1);
+        }
+
+        [TestMethod()]
+        public void CreateParserFactoryTest()
+        {
+            Type expect = typeof(Sample_Crunch.StandardPanels.CsvParserFactory);
+            IParserFactory lfp = PluginFactory.CreateParserFactory(expect);
+            Assert.IsInstanceOfType(lfp, expect);
+        }
+
+        [TestMethod()]
+        public void CreateAnalyzerTest()
+        {
+            //Type expect = typeof(Sample_Crunch.StandardPanels.csvParser);
+            //IParserFactory lfp = PluginFactory.CreateParserFactory(expect);
+            //Assert.IsInstanceOfType(lfp, expect);
+        }
+
+        [TestMethod()]
+        public void CreatePanelFactoryTest()
+        {
+            Type expect = typeof(Sample_Crunch.StandardPanels.TimePlotFactory);
+            IPanelFactory lfp = PluginFactory.CreatePanelFactory(expect);
+            Assert.IsInstanceOfType(lfp, expect);
+        }
+
+        [TestMethod()]
+        public void FindParserTest()
+        {
+            PluginFactory.Reset();
+            PluginFactory.LoadPlugins(pluginPath);
+            Type factoryType = typeof(Sample_Crunch.StandardPanels.CsvParserFactory);
+            IParserFactory lfp = PluginFactory.FindParser(factoryType.FullName);
+            IsTypenameSame(lfp.GetType(), factoryType);
+        }
+
+        public static void IsTypenameSame(Type actual, Type expected)
+        {
+            Assert.AreEqual(actual.FullName, expected.FullName);
+        }
+
+        [TestMethod()]
+        public void FindLogFileParserTest()
+        {
+            PluginFactory.Reset();
+            PluginFactory.LoadPlugins(pluginPath);
+
+            IParserFactory lfp = PluginFactory.FindLogFileParser("dummy.csv");
+            IsTypenameSame(lfp.GetType(), typeof(Sample_Crunch.StandardPanels.CsvParserFactory));
+        }
+
+        [TestMethod()]
+        public void FindAnalyzersTest()
+        {
+
+        }
+
+        [TestMethod()]
+        public void FindPanelFactoryTest()
+        {
+            PluginFactory.Reset();
+            PluginFactory.LoadPlugins(pluginPath);
+            Type factoryType = typeof(Sample_Crunch.StandardPanels.TimePlotFactory);
+            var factory = PluginFactory.CreatePanelFactory(factoryType);
+            var model = factory.CreateModel();
+            IPanelFactory lfp = PluginFactory.FindPanelFactory(model);
+            IsTypenameSame(lfp.GetType(), factoryType);
         }
 
         [TestMethod]
@@ -49,7 +163,7 @@ namespace UnitTestProject
             }
 
             // Verify that it continued
-            Assert.IsTrue(PluginFactory.Parsers.Count >= 1, "Expected one plugin at path " + pluginPath);
+            Assert.IsTrue(PluginFactory.ParserFactories.Count >= 1, "Expected one plugin at path " + pluginPath);
         }
 
         //[TestMethod]

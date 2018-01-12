@@ -29,19 +29,18 @@ namespace Sample_Crunch.ViewModel
 
             try
             {
-                Type storedType = PluginFactory.FindParser(fileData.DataParserType);
-                if (storedType != null)
+                // Try to use specified factory
+                var parserFactory = PluginFactory.FindParser(fileData.DataParserType);
+
+                // If not available use any other able to use open that format
+                if (parserFactory == null)
                 {
-                    DataParser = PluginFactory.CreateLogFileParser(storedType);
-                }
-                else
-                {
-                    DataParser = PluginFactory.FindLogFileParser(fileData.FileName);
+                    parserFactory = PluginFactory.FindLogFileParser(fileData.FileName);
                 }
 
-                if (DataParser == null) throw new InvalidOperationException("No parser for " + fileData.FileName + " available.");
+                if (parserFactory == null) throw new InvalidOperationException("No parser for " + fileData.FileName + " available.");
 
-                this.LogFile = DataParser.Open(fileData.FileName, fileData.Settings);
+                this.LogFile = parserFactory.Open(fileData.FileName, fileData.Settings);
             }
             catch (IOException ioe)
             {
@@ -111,9 +110,9 @@ namespace Sample_Crunch.ViewModel
 
         public ObservableCollection<ISignalViewModel> Signals { get { return signalViewModels; } }
         
-        public ILogFile LogFile { get; set; }
+        public IParser LogFile { get; set; }
 
-        public ILogFileParser DataParser { get; set; }
+        public IParserFactory ParserFactory { get; set; }
 
         public ICollectionView SignalsFiltered
         {

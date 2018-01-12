@@ -28,7 +28,7 @@
         event EventHandler FilesRealigned;
         
         void AddLogFile(string filename);
-        void AddLogFile(string filename, ILogFileParser parser);
+        void AddLogFile(string filename, IParserFactory parser);
         List<ISignalViewModel> FindSignalByTag(string tag);
         ISignalViewModel GetSignal(string path);
         IMarkerViewModel GetMarkerViewModel(IMarkerModel markerModel);
