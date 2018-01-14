@@ -1,6 +1,5 @@
 ﻿using PluginFramework;
 using System;
-using System.Deployment.Application;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -108,14 +107,13 @@ namespace Sample_Crunch
             // If this is first run show news
             try
             {
-                if (ApplicationDeployment.CurrentDeployment.IsFirstRun)
+                bool firstrun = SimpleIoc.Default.GetInstance<ViewModel.UpdateViewModel>().IsFirstRun;
+                if (firstrun)
                 {
                     this.GettingStartedMenuItem_Click(null, new RoutedEventArgs());
                 }
 
-                Telemetry.Context.Session.IsFirst = ApplicationDeployment.CurrentDeployment.IsFirstRun;
-                // Check if this was last run since update
-                //else if (ApplicationDeployment.CurrentDeployment.)
+                Telemetry.Context.Session.IsFirst = firstrun;
             }
             catch (System.Deployment.Application.InvalidDeploymentException)
             {

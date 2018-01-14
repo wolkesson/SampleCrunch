@@ -16,8 +16,16 @@ namespace Sample_Crunch.ViewModel
     public class UpdateViewModel:ViewModelBase
     {
         UpdateManager manager;
+        bool firstRun = false;
+
         public UpdateViewModel()
         {
+            // Note, in most of these scenarios, the app exits after this method completes!
+            SquirrelAwareApp.HandleEvents(
+              //onInitialInstall: v => mgr.CreateShortcutForThisExe(),
+              //onAppUpdate: v => mgr.CreateShortcutForThisExe(),
+              //onAppUninstall: v => mgr.RemoveShortcutForThisExe(),
+              onFirstRun: () => firstRun = true);
         }
 
         public override void Cleanup()
@@ -77,6 +85,11 @@ namespace Sample_Crunch.ViewModel
                 this.updateAvailable = value;
                 RaisePropertyChanged<bool>(nameof(UpdateAvailable));
             }
+        }
+
+        public bool IsFirstRun
+        {
+            get { return this.firstRun; }
         }
         
         public string AvailableVersion
