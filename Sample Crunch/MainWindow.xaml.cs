@@ -110,7 +110,7 @@ namespace Sample_Crunch
                 bool firstrun = SimpleIoc.Default.GetInstance<ViewModel.UpdateViewModel>().IsFirstRun;
                 if (firstrun)
                 {
-                    this.GettingStartedMenuItem_Click(null, new RoutedEventArgs());
+                    MainViewModel.ShowWebPageCommand.Execute(@"https://wolkesson.github.io/SampleCrunch/getting-started");
                 }
 
                 Telemetry.Context.Session.IsFirst = firstrun;
@@ -223,15 +223,6 @@ namespace Sample_Crunch
         public TelemetryClient Telemetry { get { return SimpleIoc.Default.GetInstance<TelemetryClient>(); } }
 
         public ViewModel.MainViewModel MainViewModel { get { return SimpleIoc.Default.GetInstance<ViewModel.MainViewModel>(); } }
-        private void GettingStartedMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            MainViewModel.DialogService.ShowWebPage("Getting Started", @"Resources/GettingStarted.html");
-        }
-
-        private void ChangeLogMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            MainViewModel.DialogService.ShowWebPage("What's new", @"Resources/ChangeLog.html");
-        }
 
         private void SaveProjectMenuItem_Click(object sender, RoutedEventArgs e)
         {

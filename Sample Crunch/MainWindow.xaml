@@ -56,8 +56,16 @@
                 <MenuItem Header="Manage Plugins" Command="{Binding ShowPluginManagerFormCommand}" />
             </MenuItem>
             <MenuItem Header="Help" HorizontalAlignment="Right">
-                <MenuItem Header="Getting Started" Click="GettingStartedMenuItem_Click"></MenuItem>
-                <MenuItem Header="What's New" Click="ChangeLogMenuItem_Click"></MenuItem>
+                <MenuItem Header="Getting Started" Command="{Binding ShowWebPageCommand}" CommandParameter="https://wolkesson.github.io/SampleCrunch/getting-started">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/appbar.browser.wire.png" Height="24" Width="24"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Project Site" Command="{Binding ShowWebPageCommand}" CommandParameter="https://wolkesson.github.io/SampleCrunch/index">
+                    <MenuItem.Icon>
+                        <Image Source="/Resources/appbar.browser.wire.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="About" Click="MenuItem_Click"></MenuItem>
             </MenuItem>
