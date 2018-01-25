@@ -73,16 +73,6 @@ namespace Sample_Crunch.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap appbar_browser_wire {
-            get {
-                object obj = ResourceManager.GetObject("appbar_browser_wire", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap appbar_sort_alphabetical {
             get {
                 object obj = ResourceManager.GetObject("appbar_sort_alphabetical", resourceCulture);

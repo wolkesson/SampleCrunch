@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Sample_Crunch"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="480" Width="640" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Topmost="True">
+        Title="{Binding Title}" Height="480" Width="640" WindowStartupLocation="CenterOwner" Topmost="True">
     <Grid Margin="5">
         <WebBrowser x:Name="browser" local:WebBrowserUtility.BindableSource="{Binding Address}"/>
     </Grid>
