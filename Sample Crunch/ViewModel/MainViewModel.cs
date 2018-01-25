@@ -98,6 +98,20 @@ namespace Sample_Crunch.ViewModel
             form.Show();
         }
 
+        private ICommand showWebPageCommand;
+        public ICommand ShowWebPageCommand
+        {
+            get
+            {
+                return showWebPageCommand ?? (showWebPageCommand = new RelayCommand<string>(Execute_ShowWebPageCommand));
+            }
+        }
+
+        private void Execute_ShowWebPageCommand(string uri)
+        {
+            DialogService.ShowWebPage("Help", uri);
+        }
+
         #region Project Commands
         private ICommand newProjectCommand;
         public ICommand NewProjectCommand

@@ -2,13 +2,7 @@
 
 namespace Sample_Crunch
 {
-    using System.Diagnostics;
-    using System.Threading;
-    using Squirrel;
-    using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using System.Windows.Forms;
     using GalaSoft.MvvmLight.Ioc;
 
     /// <summary>

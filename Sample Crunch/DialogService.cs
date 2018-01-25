@@ -47,6 +47,7 @@ namespace Sample_Crunch
             WebWindow w = new WebWindow();
             w.Title = title;
             w.Address = address;
+            w.Owner = App.Current.MainWindow;
             w.Show();
         }
 

@@ -374,8 +374,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\ChangeLog.html" />
-    <Resource Include="Resources\GettingStarted.html" />
     <Resource Include="Resources\SampleCrunchLogo.png" />
   </ItemGroup>
   <ItemGroup>
@@ -392,6 +390,17 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MSHTML">
+      <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
+      <VersionMajor>4</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
