@@ -8,9 +8,9 @@ using Xceed.Wpf.AvalonDock.Layout.Serialization;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using GalaSoft.MvvmLight.Ioc;
-using Microsoft.ApplicationInsights;
 using System.Threading.Tasks;
 using System.Text;
+using System.Globalization;
 
 namespace Sample_Crunch
 {
@@ -68,8 +68,8 @@ namespace Sample_Crunch
             }
             catch (Exception ex)
             {
-                await MainViewModel.DialogService.ShowError(ex.Message, "Cold not load plugins", "Continue", null);
-                Telemetry.TrackException(new Microsoft.ApplicationInsights.DataContracts.ExceptionTelemetry(ex));
+                await MainViewModel.DialogService.ShowError(ex.Message, "Could not load plugins", "Continue", null);
+                AppTelemetry.ReportError("Loading", ex);
             }
 
             // Add local factories which will not be found because they are not in dll's.
@@ -111,58 +111,19 @@ namespace Sample_Crunch
                 if (firstrun)
                 {
                     MainViewModel.ShowWebPageCommand.Execute(@"https://wolkesson.github.io/SampleCrunch/getting-started");
+                    Properties.Settings.Default.AppTelemetry = (MessageBox.Show(
+                        "Sample Crunch uses volentary telemetry to track usage and find bugs. Do you approve to send annonumous data?",
+                        "Allow telemetry?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes);
                 }
-
-                Telemetry.Context.Session.IsFirst = firstrun;
             }
             catch (System.Deployment.Application.InvalidDeploymentException)
             {
                 // We will end up here if application is not installed, but run locally. 
             }
 
-            // Send telemetry async
-            Task.Factory.StartNew(() => SendConfigurationTelemetry()); // No reason to await this
-        }
-
-        private void SendConfigurationTelemetry()
-        {
-            // Send Telemetry data to Application Insight. This is used to priorities the work forward.
-            // Data sent in Custom data is put in a dDictionary<string,string> as follows
-            // "Parsers"    Title1 (filetype1), Title2 (filetype2), ...
-            // "Panels"     Title1 (classname1), Title2 (classname2), ... 
-            // "Analyzers"  Title1, Title2, ...
-            try
-            {
-                Dictionary<string, string> props = new Dictionary<string, string>();
-                StringBuilder sb = new StringBuilder();
-
-                // Log Parsers
-                foreach (IParserFactory parser in PluginFactory.ParserFactories)
-                {
-                    ParserPluginAttribute attr = parser.GetType().GetCustomAttribute<ParserPluginAttribute>(false);
-                    if (attr != null)
-                    {
-                        sb.AppendFormat("{0} ({1}), ", attr.Title, attr.FileType);
-                    }
-                }
-                props.Add("Parsers", sb.ToString());
-                sb.Clear();
-
-                // Log Panels
-                PluginFactory.PanelFactories.ForEach((str) => { sb.AppendFormat("{0} ({1}), ", str.Title, str.ToString()); });
-                props.Add("Panels", sb.ToString());
-                sb.Clear();
-
-                // Log Analysers
-                PluginFactory.Analyzers.ForEach((str) => { sb.AppendFormat("{0}, ", str.ToString()); });
-                props.Add("Analyzers", sb.ToString());
-                sb.Clear();
-
-                // Send it
-                Telemetry.TrackTrace("Plugins", Microsoft.ApplicationInsights.DataContracts.SeverityLevel.Information, props);
-            }
-            finally
-            { }
+            // Block App telemetry if user has disapproved it
+            AppTelemetry.DoNotSend = !Properties.Settings.Default.AppTelemetry;
+            AppTelemetry.RegisterUser(CultureInfo.InstalledUICulture.EnglishName, MainViewModel.Version);
         }
 
         private void UnhandledceptionHandler(object sender, UnhandledExceptionEventArgs e)
@@ -170,7 +131,7 @@ namespace Sample_Crunch
             MessageBox.Show(e.ExceptionObject.ToString());
 
             // Send the exception telemetry:
-            Telemetry.TrackException((Exception)e.ExceptionObject);
+            AppTelemetry.ReportError("Unhandled", (Exception)e.ExceptionObject);
 
             // Close application
             if (e.IsTerminating) Environment.Exit(0);
@@ -220,8 +181,6 @@ namespace Sample_Crunch
             splash.Show();
         }
 
-        public TelemetryClient Telemetry { get { return SimpleIoc.Default.GetInstance<TelemetryClient>(); } }
-
         public ViewModel.MainViewModel MainViewModel { get { return SimpleIoc.Default.GetInstance<ViewModel.MainViewModel>(); } }
 
         private void SaveProjectMenuItem_Click(object sender, RoutedEventArgs e)
@@ -239,6 +198,16 @@ namespace Sample_Crunch
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                TimeSpan runtime = DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
+                AppTelemetry.ReportUsage((int)runtime.TotalMinutes, PluginFactory.ParserFactories.Count, PluginFactory.PanelFactories.Count, PluginFactory.Analyzers.Count);
+            }
+            catch (Exception)
+            {
+                // Catch all since we are closing
+            }
+
             ViewModel.ViewModelLocator.Cleanup();
             this.Close();
             App.Current.Shutdown();

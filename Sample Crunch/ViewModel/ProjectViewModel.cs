@@ -1,7 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
-using Microsoft.ApplicationInsights;
 using PluginFramework;
 using Sample_Crunch.Model;
 using System;
@@ -65,14 +64,6 @@ namespace Sample_Crunch.ViewModel
             get
             {
                 return SimpleIoc.Default.GetInstance<IMainViewModel>();
-            }
-        }
-
-        public TelemetryClient Telemetry
-        {
-            get
-            {
-                return SimpleIoc.Default.GetInstance<TelemetryClient>();
             }
         }
 
@@ -356,7 +347,6 @@ namespace Sample_Crunch.ViewModel
 
             file.DataParserType = parser.GetType().FullName;
             this.ProjectModel.Files.Add(file);
-            this.Telemetry.TrackEvent("Add Logfile", new Dictionary<string, string> { { "Parser", parser.ToString() }, { "Filename", file.Title } });
         }
 
         public void AddLogFile(string filename)

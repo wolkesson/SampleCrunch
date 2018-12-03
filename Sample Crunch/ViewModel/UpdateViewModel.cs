@@ -1,7 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
-using Microsoft.ApplicationInsights;
 using Squirrel;
 using System;
 using System.Collections.Generic;
@@ -100,8 +99,6 @@ namespace Sample_Crunch.ViewModel
         private ICommand updateCommand;
         private ReleaseEntry lastVersion = null;
 
-        TelemetryClient telemetry = SimpleIoc.Default.GetInstance<TelemetryClient>();
-
         public ICommand UpdateCommand
         {
             get
@@ -145,14 +142,16 @@ namespace Sample_Crunch.ViewModel
 
                 //manager.CreateShortcutForThisExe();
 
-                // Send Telemetry
                 MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
-                Dictionary<string, string> props = new Dictionary<string, string>();
-                props.Add("from", main.Version);
-                props.Add("to", this.lastVersion.Version.ToString());
-                Dictionary<string, double> metrics = new Dictionary<string, double>();
-                metrics.Add("Elapse", watch.ElapsedMilliseconds);
-                telemetry.TrackEvent("Updating", props, metrics);
+
+                // Send Telemetry
+                System.Collections.Specialized.NameValueCollection data = new System.Collections.Specialized.NameValueCollection
+                {
+                    { "from", main.Version },
+                    { "to", this.lastVersion.Version.ToString() },
+                    { "elapse", watch.ElapsedMilliseconds.ToString() }
+                };
+                AppTelemetry.ReportEvent("Updating", data);
 
                 CurrentState = State.Installed;
                 //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
@@ -161,7 +160,7 @@ namespace Sample_Crunch.ViewModel
             }
             catch (Exception e)
             {
-                telemetry.TrackException(e);
+                AppTelemetry.ReportError("Update", e);
                 CurrentState = State.Failed;
             }
             finally
@@ -197,8 +196,7 @@ namespace Sample_Crunch.ViewModel
             }
             catch (Exception e)
             {
-                TelemetryClient cl = SimpleIoc.Default.GetInstance<TelemetryClient>();
-                cl.TrackException(e);
+                AppTelemetry.ReportError("Update", e);
                 CurrentState = State.Failed;
             }
         }

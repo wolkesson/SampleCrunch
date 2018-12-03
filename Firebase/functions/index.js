@@ -13,30 +13,58 @@ exports.echo = functions.https.onRequest((request, response) => {
     response.send(request.body.text);
 });
 
+exports.registerUser = functions.https.onRequest((request, response) => {
+    const collection = firestore.collection('users');
+
+    // Use auto-ID if not specified otherwise. 
+    let overrideUID = request.body.uid; // Used for testing
+    let document = overrideUID ? collection.doc(overrideUID): collection.doc();
+
+    return document.set({ 
+        totalRuns: 0,
+        totalTime: 0,
+        version: request.body.version, 
+        country: request.body.locale 
+    })
+    .then(() => { return response.send(document.id); })
+});
+
+
 exports.reportUsage = functions.https.onRequest((request, response) => {
     let uid = request.body.uid;
-    let lastRunTime = request.body.lastRunTime;
-    let version = request.body.version;
-    let nbPlugins = request.body.nbPlugins;
+    let lastRunTime = request.body.lastRunTime | 0;
 
-    let document
-    if (uid === undefined) {
-        // This is a new user!
-        document = firestore.collection('usage').doc();
-        document.set({ totalRuns: 0, runs: [] });
-        uid = document.id
-    }
-    else {
-        document = firestore.doc('usage/' + uid);
-    }
+    let document = firestore.doc('users/' + uid);
 
-    return document.get().then(documentSnapshot => {
-        const currentCount = documentSnapshot.exists ? documentSnapshot.data().totalRuns : 0
+    return document.get()
+        .then(snap => {
+            const runs = snap.exists ? snap.data().totalRuns : 0
+            const time = snap.exists ? snap.data().totalTime : 0
 
-        return document.set({
-            totalRuns: Number(currentCount) + 1
+            return document.set({
+                totalRuns: Number(runs) + 1,
+                totalTime: Number(time) + lastRunTime,
+                // version: request.body.version
+            })
         })
-    })
-        .then(() => { return document.collection('runs').add({ 'runtime': lastRunTime, 'version': version, 'nbPlugins': nbPlugins }) })
+        .then(() => {
+            return document.collection('runs').add({
+                'runtime': lastRunTime,
+                'parsers': request.body.numberOfParsers,
+                'panels': request.body.numberOfPanels,
+                'analyzers': request.body.numberOfAnalyzers
+            })
+        })
         .then(() => { return response.send(uid); })
+});
+
+exports.reportEvent = functions.https.onRequest((request, response) => {
+    let uid = request.body.uid;
+    let document = firestore.doc('users/' + uid);
+    return document.get()
+        .then(snap => { return document.collection('events').add(request.body) })
+});
+
+exports.reportError = functions.https.onRequest((request, response) => {
+    return firestore.collection('errors').add(request.body);
 });

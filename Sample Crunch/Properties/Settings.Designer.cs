@@ -12,7 +12,7 @@ namespace Sample_Crunch.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,6 +20,38 @@ namespace Sample_Crunch.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
+            }
+        }
+        
+        /// <summary>
+        /// Allow App Telemetry to be sent
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("Allow App Telemetry to be sent")]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AppTelemetry {
+            get {
+                return ((bool)(this["AppTelemetry"]));
+            }
+            set {
+                this["AppTelemetry"] = value;
+            }
+        }
+        
+        /// <summary>
+        /// Unique ID for App Telemetry
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("Unique ID for App Telemetry")]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AppTelemetryUID {
+            get {
+                return ((string)(this["AppTelemetryUID"]));
+            }
+            set {
+                this["AppTelemetryUID"] = value;
             }
         }
     }
