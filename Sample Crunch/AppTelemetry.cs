@@ -67,30 +67,46 @@ namespace Sample_Crunch
         internal static void ReportError(string realm, Exception exception)
         {
             if (DoNotSend) return;
-            NameValueCollection values = new NameValueCollection();
-            values.Add("realm", realm);
 
-            values.Add("message", exception.Message);
-            values.Add("trace", exception.StackTrace);
-
-            if (exception.InnerException != null)
+            try
             {
-                values.Add("innerMessage", exception.InnerException.Message);
-                values.Add("innerTrace", exception.InnerException.StackTrace);
-            }
+                NameValueCollection values = new NameValueCollection();
+                values.Add("realm", realm);
 
-            WebClient wc = new WebClient();
-            wc.UploadValuesAsync(new Uri(baseUrl + "reportError"), values);
+                values.Add("message", exception.Message);
+                values.Add("trace", exception.StackTrace);
+
+                if (exception.InnerException != null)
+                {
+                    values.Add("innerMessage", exception.InnerException.Message);
+                    values.Add("innerTrace", exception.InnerException.StackTrace);
+                }
+
+                WebClient wc = new WebClient();
+                wc.UploadValuesAsync(new Uri(baseUrl + "reportError"), values);
+            }
+            catch (Exception)
+            {
+                // Don't error handle the error reporting
+            }
         }
 
         internal static void ReportEvent(string type, NameValueCollection data)
         {
             if (DoNotSend) return;
-            data.Add("uid", GetUID());
-            data.Add("type", type);
 
-            WebClient wc = new WebClient();
-            wc.UploadValuesAsync(new Uri(baseUrl + "reportEvent"), data);
+            try
+            {
+                data.Add("uid", GetUID());
+                data.Add("type", type);
+
+                WebClient wc = new WebClient();
+                wc.UploadValuesAsync(new Uri(baseUrl + "reportEvent"), data);
+            }
+            catch (Exception)
+            {
+                // Don't error handle the event reporting
+            }
         }
     }
 }

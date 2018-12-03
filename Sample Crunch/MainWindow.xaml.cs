@@ -121,9 +121,14 @@ namespace Sample_Crunch
                 // We will end up here if application is not installed, but run locally. 
             }
 
-            // Block App telemetry if user has disapproved it
-            AppTelemetry.DoNotSend = !Properties.Settings.Default.AppTelemetry;
-            AppTelemetry.RegisterUser(CultureInfo.InstalledUICulture.EnglishName, MainViewModel.Version);
+            try
+            {
+                // Block App telemetry if user has disapproved it
+                AppTelemetry.DoNotSend = !Properties.Settings.Default.AppTelemetry;
+                AppTelemetry.RegisterUser(CultureInfo.InstalledUICulture.EnglishName, MainViewModel.Version);
+            }
+            catch
+            { }
         }
 
         private void UnhandledceptionHandler(object sender, UnhandledExceptionEventArgs e)
