@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Microsoft.ApplicationInsights;
 using PluginFramework;
 
 namespace Sample_Crunch.ViewModel
