@@ -57,7 +57,7 @@
             </MenuItem>
             <MenuItem Header="Help" HorizontalAlignment="Right">
                 <MenuItem Header="Getting Started" Command="{Binding ShowWebPageCommand}" CommandParameter="https://wolkesson.github.io/SampleCrunch/getting-started"></MenuItem>
-                <MenuItem Header="Project Site" Command="{Binding ShowWebPageCommand}" CommandParameter="https://wolkesson.github.io/SampleCrunch/index"></MenuItem>
+                <MenuItem Header="User Guide" Command="{Binding ShowWebPageCommand}" CommandParameter="https://wolkesson.github.io/SampleCrunch/index"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="About" Click="MenuItem_Click"></MenuItem>
             </MenuItem>
@@ -86,11 +86,7 @@
             </xcad:DockingManager.LayoutItemContainerStyle>
             <xcad:DockingManager.LayoutItemTemplateSelector>
                 <local:PanesTemplateSelector>
-                    <!--<local:PanesTemplateSelector.WebViewTemplate>
-                        <DataTemplate>
-                            <WebBrowser local:WebBrowserUtility.BindableSource="{Binding URI}" />
-                        </DataTemplate>
-                    </local:PanesTemplateSelector.WebViewTemplate>
+                    <!--
                     <local:PanesTemplateSelector.MarkersPaneTemplate>
                         <DataTemplate>
                             <local:MarkersPane />

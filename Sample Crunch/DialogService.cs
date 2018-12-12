@@ -42,15 +42,6 @@ namespace Sample_Crunch
             return Task.Factory.StartNew(() => { System.Windows.MessageBox.Show(message, title); });
         }
 
-        public void ShowWebPage(string title, string address)
-        {
-            WebWindow w = new WebWindow();
-            w.Title = title;
-            w.Address = address;
-            w.Owner = App.Current.MainWindow;
-            w.Show();
-        }
-
         public IRangeModel ShowRangeDialog(double from, double to)
         {
             RangeViewModel rangeVM = new RangeViewModel(from, to);

@@ -109,7 +109,7 @@ namespace Sample_Crunch.ViewModel
 
         private void Execute_ShowWebPageCommand(string uri)
         {
-            DialogService.ShowWebPage("Help", uri);
+            System.Diagnostics.Process.Start(uri);
         }
 
         #region Project Commands

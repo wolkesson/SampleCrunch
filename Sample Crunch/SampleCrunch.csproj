@@ -194,7 +194,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AppTelemetry.cs" />
-    <Compile Include="AttachedProperties.cs" />
     <Compile Include="Controls\DragBehavior.cs" />
     <Compile Include="Controls\Timeline.xaml.cs">
       <DependentUpon>Timeline.xaml</DependentUpon>
@@ -245,9 +244,6 @@
     <Compile Include="ViewModel\SignalViewModel.cs" />
     <Compile Include="ViewModel\UpdateViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
-    <Compile Include="WebWindow.xaml.cs">
-      <DependentUpon>WebWindow.xaml</DependentUpon>
-    </Compile>
     <Page Include="Controls\Timeline.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -293,10 +289,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SplashScreen.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WebWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
