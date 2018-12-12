@@ -120,22 +120,14 @@ namespace Sample_Crunch.StandardPanels.ViewModel
             scatterSerie.BinSize = 4;
 
             List<DataPoint> dataPoints = new List<DataPoint>(xdata.GetLength(0));
+            double xInRad = (xSignal.Unit == "rad") ? 180.0 / Math.PI : 1;
+            double yInRad = (ySignal.Unit == "rad") ? 180.0 / Math.PI : 1;
 
             for (int i = 0; i < xdata.GetLength(0); i++)
-                {
+            {
                 XYPlotPaneViewModel.DataPoint dp = new XYPlotPaneViewModel.DataPoint();
-                    double x = xdata[i].Value;
-                    if (xSignal.Unit == "rad")
-                    {
-                    dp.X = x * 180 / Math.PI;
-                    }
-
-                    double y = ydata[i].Value;
-                    if (ySignal.Unit == "rad")
-                    {
-                    dp.Y = y * 180 / Math.PI;
-                    }
-
+                dp.X = xdata[i].Value * xInRad;
+                dp.Y = ydata[i].Value * yInRad;
                 dp.T = xdata[i].Time;
                
                 dp.ScatterPoint = new OxyPlot.Series.ScatterPoint(dp.X, dp.Y);

@@ -64,14 +64,14 @@ namespace SamplePlugins
                 case 10:
                     for (long i = 0; i < returnSample.LongLength; i++)
                     {
-                        returnSample[i] = new Sample() { Time = t, Value = Math.Sin(t.Ticks * 0.00000002) * 0.01 + 58 };
+                        returnSample[i] = new Sample() { Time = t, Value = Math.Sin(t.Ticks * 0.00000002) * 0.01 + 15 };
                         t = t.AddMilliseconds(sampleTime);
                     }
                     break;
                 case 11:
                     for (long i = 0; i < returnSample.LongLength; i++)
                     {
-                        returnSample[i] = new Sample() { Time = t, Value = Math.Cos(t.Ticks * 0.00000002) * 0.01 + 15 };
+                        returnSample[i] = new Sample() { Time = t, Value = Math.Cos(t.Ticks * 0.00000002) * 0.01 + 58 };
                         t = t.AddMilliseconds(sampleTime);
                     }
                     break;
