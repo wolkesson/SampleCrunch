@@ -140,7 +140,7 @@ namespace Sample_Crunch.ViewModel
                 await manager.ApplyReleases(updates);
                 await manager.UpdateApp();
 
-                //manager.CreateShortcutForThisExe();
+                manager.CreateShortcutForThisExe();
 
                 MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
 
