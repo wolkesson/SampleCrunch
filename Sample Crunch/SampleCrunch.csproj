@@ -380,7 +380,7 @@
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
       <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
     </GetAssemblyIdentity>
-    <Exec Command="..\packages\NuGet.CommandLine.4.4.1\tools\nuget pack SampleCrunch.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir)squirrel -BasePath $(OutDir)" />
-    <Exec Command="..\packages\squirrel.windows.1.7.8\tools\squirrel --releasify $(OutDir)squirrel\SampleCrunch.$([System.Version]::Parse(%(myAssemblyInfo.Version)).ToString(3)).nupkg" />
+    <Exec Command="..\packages\NuGet.CommandLine.4.7.1\tools\nuget pack SampleCrunch.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir)squirrel -BasePath $(OutDir)" />
+    <Exec Command="..\packages\squirrel.windows.1.9.0\tools\squirrel --releasify $(OutDir)squirrel\SampleCrunch.$([System.Version]::Parse(%(myAssemblyInfo.Version)).ToString(3)).nupkg" />
   </Target>
 </Project>
