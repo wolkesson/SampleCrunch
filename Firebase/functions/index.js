@@ -41,7 +41,7 @@ exports.reportUsage = functions.https.onRequest((request, response) => {
             const runs = snap.exists ? snap.data().totalRuns : 0
             const time = snap.exists ? snap.data().totalTime : 0
 
-            return document.set({
+            return document.update({
                 totalRuns: Number(runs) + 1,
                 totalTime: Number(time) + lastRunTime,
                 // version: request.body.version
