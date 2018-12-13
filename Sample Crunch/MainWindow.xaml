@@ -3,10 +3,7 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:local="clr-namespace:Sample_Crunch"
                  xmlns:controls="clr-namespace:Sample_Crunch.Controls"
-                 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                  xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
-                 xmlns:s="clr-namespace:System;assembly=mscorlib"
-        
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                  d1p1:Ignorable="d" 
                  xmlns:d1p1="http://schemas.openxmlformats.org/markup-compatibility/2006"
