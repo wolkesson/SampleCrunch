@@ -31,7 +31,7 @@ using System.Windows;
 //[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
 
 // Squirrel to handle command line arguments during installation
-[assembly: AssemblyMetadata("SquirrelAwareVersion", "1")]
+//[assembly: AssemblyMetadata("SquirrelAwareVersion", "1")]
 
 [assembly: ThemeInfo(
     ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located

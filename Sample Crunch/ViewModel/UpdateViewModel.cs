@@ -1,12 +1,9 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
-using GalaSoft.MvvmLight.Ioc;
 using Squirrel;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -19,12 +16,14 @@ namespace Sample_Crunch.ViewModel
 
         public UpdateViewModel()
         {
-            // Note, in most of these scenarios, the app exits after this method completes!
-            SquirrelAwareApp.HandleEvents(
-              //onInitialInstall: v => mgr.CreateShortcutForThisExe(),
-              //onAppUpdate: v => mgr.CreateShortcutForThisExe(),
-              //onAppUninstall: v => mgr.RemoveShortcutForThisExe(),
-              onFirstRun: () => firstRun = true);
+            //this.manager = new UpdateManager("");
+
+            //// Note, in most of these scenarios, the app exits after this method completes!
+            //SquirrelAwareApp.HandleEvents(
+            //  onInitialInstall: v => manager.CreateShortcutForThisExe(),
+            //  onAppUpdate: v => manager.CreateShortcutForThisExe(),
+            //  onAppUninstall: v => manager.RemoveShortcutForThisExe(),
+            //  onFirstRun: () => firstRun = true);
         }
 
         public override void Cleanup()
@@ -140,7 +139,7 @@ namespace Sample_Crunch.ViewModel
                 await manager.ApplyReleases(updates);
                 await manager.UpdateApp();
 
-                manager.CreateShortcutForThisExe();
+                //manager.CreateShortcutForThisExe();
 
                 MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
 
