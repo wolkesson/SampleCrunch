@@ -12,28 +12,14 @@ namespace Sample_Crunch.ViewModel
 {
     public class UpdateViewModel:ViewModelBase
     {
-        UpdateManager manager;
-        bool firstRun = false;
-
         public UpdateViewModel()
         {
-            //this.manager = new UpdateManager("");
 
-            //// Note, in most of these scenarios, the app exits after this method completes!
-            //SquirrelAwareApp.HandleEvents(
-            //  onInitialInstall: v => manager.CreateShortcutForThisExe(),
-            //  onAppUpdate: v => manager.CreateShortcutForThisExe(),
-            //  onAppUninstall: v => manager.RemoveShortcutForThisExe(),
-            //  onFirstRun: () => firstRun = true);
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
-            if (manager != null)
-            {
-                manager.Dispose();
-            }
         }
 
         public Task CheckForUpdates(int timeout)
@@ -86,11 +72,6 @@ namespace Sample_Crunch.ViewModel
             }
         }
 
-        public bool IsFirstRun
-        {
-            get { return this.firstRun; }
-        }
-        
         public string AvailableVersion
         {
             get { return (lastVersion == null ? "Checking..." : lastVersion.Version.ToString()); }
@@ -127,36 +108,38 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 Stopwatch watch = Stopwatch.StartNew();
-
-                var updates = await manager.CheckForUpdate();
-                var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                CurrentState = State.Downloading;
-                await manager.DownloadReleases(new[] { lastVersion });
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
+                {
+                    var updates = await manager.CheckForUpdate();
+                    var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
+                    CurrentState = State.Downloading;
+                    await manager.DownloadReleases(new[] { lastVersion });
 #if DEBUG
             System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
 
 #else
-                CurrentState = State.Installing;
-                await manager.ApplyReleases(updates);
-                await manager.UpdateApp();
+                    CurrentState = State.Installing;
+                    await manager.ApplyReleases(updates);
+                    await manager.UpdateApp();
 
-                //manager.CreateShortcutForThisExe();
+                    //manager.CreateShortcutForThisExe();
 
-                MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
+                    MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
 
-                // Send Telemetry
-                System.Collections.Specialized.NameValueCollection data = new System.Collections.Specialized.NameValueCollection
-                {
-                    { "from", main.Version },
-                    { "to", this.lastVersion.Version.ToString() },
-                    { "elapse", watch.ElapsedMilliseconds.ToString() }
-                };
-                AppTelemetry.ReportEvent("Updating", data);
+                    // Send Telemetry
+                    System.Collections.Specialized.NameValueCollection data = new System.Collections.Specialized.NameValueCollection
+                    {
+                        { "from", main.Version },
+                        { "to", this.lastVersion.Version.ToString() },
+                        { "elapse", watch.ElapsedMilliseconds.ToString() }
+                    };
+                    AppTelemetry.ReportEvent("Updating", data);
 
-                CurrentState = State.Installed;
-                //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
-                UpdateManager.RestartApp();
+                    CurrentState = State.Installed;
+                    //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
+                    UpdateManager.RestartApp();
 #endif
+                }
             }
             catch (Exception e)
             {
@@ -174,24 +157,22 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 CurrentState = State.Checking;
-                if (manager == null)
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
                 {
-                    this.manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true);
-                }
+                    var updates = await manager.CheckForUpdate();
+                    this.lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
 
-                var updates = await manager.CheckForUpdate();
-                this.lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-
-                if (this.lastVersion == null)
-                {
-                    CurrentState = State.NoUpdateAvailable;
-                    UpdateAvailable = false;
-                }
-                else
-                {
-                    UpdateAvailable = true;
-                    CurrentState = State.UpdateAvailable;
-                    RaisePropertyChanged<string>(nameof(AvailableVersion));
+                    if (this.lastVersion == null)
+                    {
+                        CurrentState = State.NoUpdateAvailable;
+                        UpdateAvailable = false;
+                    }
+                    else
+                    {
+                        UpdateAvailable = true;
+                        CurrentState = State.UpdateAvailable;
+                        RaisePropertyChanged<string>(nameof(AvailableVersion));
+                    }
                 }
             }
             catch (Exception e)

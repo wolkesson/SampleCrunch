@@ -107,13 +107,15 @@ namespace Sample_Crunch
             // If this is first run show news
             try
             {
-                bool firstrun = SimpleIoc.Default.GetInstance<ViewModel.UpdateViewModel>().IsFirstRun;
+                bool firstrun = Properties.Settings.Default.FirstRun;
                 if (firstrun)
                 {
                     MainViewModel.ShowWebPageCommand.Execute(@"https://wolkesson.github.io/SampleCrunch/getting-started");
                     Properties.Settings.Default.AppTelemetry = (MessageBox.Show(
                         "Sample Crunch uses volentary telemetry to track usage and find bugs. Do you approve to send annonumous data?",
                         "Allow telemetry?", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes) == MessageBoxResult.Yes);
+                    Properties.Settings.Default.FirstRun = false;
+                    Properties.Settings.Default.Save();
                 }
             }
             catch (System.Deployment.Application.InvalidDeploymentException)
@@ -125,7 +127,10 @@ namespace Sample_Crunch
             {
                 // Block App telemetry if user has disapproved it
                 AppTelemetry.DoNotSend = !Properties.Settings.Default.AppTelemetry;
-                AppTelemetry.RegisterUser(CultureInfo.InstalledUICulture.EnglishName, MainViewModel.Version);
+                if (string.IsNullOrEmpty(Properties.Settings.Default.AppTelemetryUID))
+                {
+                    AppTelemetry.RegisterUser(CultureInfo.InstalledUICulture.EnglishName, MainViewModel.Version);
+                }
             }
             catch
             { }

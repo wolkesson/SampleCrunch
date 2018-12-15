@@ -40,11 +40,8 @@ namespace Sample_Crunch
             string uid = Encoding.UTF8.GetString(resp);
 
             // Save UID for future calls
-            if (!string.IsNullOrWhiteSpace(uid))
-            {
-                Properties.Settings.Default.AppTelemetryUID = uid;
-                Properties.Settings.Default.Save();
-            }
+            Properties.Settings.Default.AppTelemetryUID = uid;
+            Properties.Settings.Default.Save();
             return uid;
         }
 
