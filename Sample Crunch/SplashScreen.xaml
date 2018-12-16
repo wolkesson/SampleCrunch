@@ -112,6 +112,6 @@
                 </Style>
             </Button.Style>
         </Button>
-        <CheckBox x:Name="checkBox" Content="Allow App Telemetry" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=AppTelemetry}" Grid.Column="1" Margin="10,10,0,0" Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="checkBox" Content="Allow App Telemetry" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=AppTelemetry}" Grid.Column="1" Margin="10,10,0,0" Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Bottom" Visibility="Hidden"/>
     </Grid>
 </Window>
