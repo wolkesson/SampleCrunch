@@ -3,43 +3,29 @@ using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
 using Squirrel;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Sample_Crunch.ViewModel
 {
-    public class UpdateViewModel:ViewModelBase
+    public class UpdateViewModel : ViewModelBase
     {
-        UpdateManager manager;
-        bool firstRun = false;
-
         public UpdateViewModel()
         {
-            // Note, in most of these scenarios, the app exits after this method completes!
-            SquirrelAwareApp.HandleEvents(
-              //onInitialInstall: v => mgr.CreateShortcutForThisExe(),
-              //onAppUpdate: v => mgr.CreateShortcutForThisExe(),
-              //onAppUninstall: v => mgr.RemoveShortcutForThisExe(),
-              onFirstRun: () => firstRun = true);
+
         }
 
         public override void Cleanup()
         {
             base.Cleanup();
-            if (manager != null)
-            {
-                manager.Dispose();
-            }
         }
 
         public Task CheckForUpdates(int timeout)
         {
             var task = CheckForUpdate();
-            
+
             return Task.Run(async () =>
             {
                 if (await Task.WhenAny(task, Task.Delay(timeout)) != task)
@@ -86,11 +72,6 @@ namespace Sample_Crunch.ViewModel
             }
         }
 
-        public bool IsFirstRun
-        {
-            get { return this.firstRun; }
-        }
-        
         public string AvailableVersion
         {
             get { return (lastVersion == null ? "Checking..." : lastVersion.Version.ToString()); }
@@ -103,7 +84,7 @@ namespace Sample_Crunch.ViewModel
         {
             get
             {
-                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, ()=> { return this.UpdateAvailable && !this.updating; }));
+                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, () => { return this.UpdateAvailable && !this.updating; }));
             }
         }
         private bool updating = false;
@@ -127,36 +108,38 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 Stopwatch watch = Stopwatch.StartNew();
-
-                var updates = await manager.CheckForUpdate();
-                var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                CurrentState = State.Downloading;
-                await manager.DownloadReleases(new[] { lastVersion });
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
+                {
+                    var updates = await manager.CheckForUpdate();
+                    var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
+                    CurrentState = State.Downloading;
+                    await manager.DownloadReleases(new[] { lastVersion });
 #if DEBUG
             System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
 
 #else
-                CurrentState = State.Installing;
-                await manager.ApplyReleases(updates);
-                await manager.UpdateApp();
+                    CurrentState = State.Installing;
 
-                manager.CreateShortcutForThisExe();
+                    //manager.CreateShortcutForThisExe();
 
-                MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
+                    MainViewModel main = SimpleIoc.Default.GetInstance<MainViewModel>();
 
-                // Send Telemetry
-                System.Collections.Specialized.NameValueCollection data = new System.Collections.Specialized.NameValueCollection
-                {
-                    { "from", main.Version },
-                    { "to", this.lastVersion.Version.ToString() },
-                    { "elapse", watch.ElapsedMilliseconds.ToString() }
-                };
-                AppTelemetry.ReportEvent("Updating", data);
+                    // Send Telemetry
+                    System.Collections.Specialized.NameValueCollection data = new System.Collections.Specialized.NameValueCollection
+                    {
+                        { "from", main.Version },
+                        { "to", this.lastVersion.Version.ToString() },
+                        { "elapse", watch.ElapsedMilliseconds.ToString() }
+                    };
+                    AppTelemetry.ReportEvent("Updating", data);
 
-                CurrentState = State.Installed;
-                //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
-                UpdateManager.RestartApp();
+                    //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
+                    await manager.ApplyReleases(updates);
+                    await manager.UpdateApp();
+
+                    CurrentState = State.Installed;
 #endif
+                }
             }
             catch (Exception e)
             {
@@ -165,6 +148,10 @@ namespace Sample_Crunch.ViewModel
             }
             finally
             {
+                if (CurrentState == State.Installed)
+                {
+                    UpdateManager.RestartApp();
+                }
                 Updating = false;
             }
         }
@@ -174,24 +161,22 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 CurrentState = State.Checking;
-                if (manager == null)
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
                 {
-                    this.manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true);
-                }
+                    var updates = await manager.CheckForUpdate();
+                    this.lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
 
-                var updates = await manager.CheckForUpdate();
-                this.lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-
-                if (this.lastVersion == null)
-                {
-                    CurrentState = State.NoUpdateAvailable;
-                    UpdateAvailable = false;
-                }
-                else
-                {
-                    UpdateAvailable = true;
-                    CurrentState = State.UpdateAvailable;
-                    RaisePropertyChanged<string>(nameof(AvailableVersion));
+                    if (this.lastVersion == null)
+                    {
+                        CurrentState = State.NoUpdateAvailable;
+                        UpdateAvailable = false;
+                    }
+                    else
+                    {
+                        UpdateAvailable = true;
+                        CurrentState = State.UpdateAvailable;
+                        RaisePropertyChanged<string>(nameof(AvailableVersion));
+                    }
                 }
             }
             catch (Exception e)
