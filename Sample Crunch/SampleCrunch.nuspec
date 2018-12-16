@@ -11,6 +11,6 @@
         <iconUrl>https://raw.githubusercontent.com/wolkesson/SampleCrunch/master/Sample%20Crunch/Resources/app.ico</iconUrl>
     </metadata>
     <files>
-		<file src="*.*" target="lib\net45\" exclude="*.pdb;*.nupkg;*.vshost.*"/>
+		<file src="*.*" target="lib\net461\" exclude="*.pdb;*.nupkg;*.vshost.*"/>
     </files>
 </package>
