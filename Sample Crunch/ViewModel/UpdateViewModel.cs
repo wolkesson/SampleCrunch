@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace Sample_Crunch.ViewModel
 {
-    public class UpdateViewModel:ViewModelBase
+    public class UpdateViewModel : ViewModelBase
     {
         public UpdateViewModel()
         {
@@ -25,7 +25,7 @@ namespace Sample_Crunch.ViewModel
         public Task CheckForUpdates(int timeout)
         {
             var task = CheckForUpdate();
-            
+
             return Task.Run(async () =>
             {
                 if (await Task.WhenAny(task, Task.Delay(timeout)) != task)
@@ -84,7 +84,7 @@ namespace Sample_Crunch.ViewModel
         {
             get
             {
-                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, ()=> { return this.UpdateAvailable && !this.updating; }));
+                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, () => { return this.UpdateAvailable && !this.updating; }));
             }
         }
         private bool updating = false;
@@ -119,8 +119,6 @@ namespace Sample_Crunch.ViewModel
 
 #else
                     CurrentState = State.Installing;
-                    await manager.ApplyReleases(updates);
-                    await manager.UpdateApp();
 
                     //manager.CreateShortcutForThisExe();
 
@@ -135,9 +133,11 @@ namespace Sample_Crunch.ViewModel
                     };
                     AppTelemetry.ReportEvent("Updating", data);
 
-                    CurrentState = State.Installed;
                     //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
-                    UpdateManager.RestartApp();
+                    await manager.ApplyReleases(updates);
+                    await manager.UpdateApp();
+
+                    CurrentState = State.Installed;
 #endif
                 }
             }
@@ -148,6 +148,10 @@ namespace Sample_Crunch.ViewModel
             }
             finally
             {
+                if (CurrentState == State.Installed)
+                {
+                    UpdateManager.RestartApp();
+                }
                 Updating = false;
             }
         }
