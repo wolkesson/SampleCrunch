@@ -38,7 +38,7 @@ namespace Sample_Crunch.StandardPanels.ViewModel
                 Position = AxisPosition.Bottom,
                 MajorGridlineStyle = LineStyle.Solid,
                 MinorGridlineStyle = LineStyle.Dot,
-                Title = "Lat",
+                Title = "Lon",
                 Key = "X"
             };
 
@@ -50,7 +50,7 @@ namespace Sample_Crunch.StandardPanels.ViewModel
                 Position = AxisPosition.Left,
                 MajorGridlineStyle = LineStyle.Solid,
                 MinorGridlineStyle = LineStyle.Dot,
-                Title = "Lon",
+                Title = "Lat",
                 Key = "Y"
             };
 
@@ -64,11 +64,11 @@ namespace Sample_Crunch.StandardPanels.ViewModel
         {
             if (xSignal== null)
             {
-                var signalLat = ProjectViewModel.FindSignalByTag("Longitude");
-                if (signalLat.Count > 0)
+                var signal = ProjectViewModel.FindSignalByTag("Longitude");
+                if (signal.Count > 0)
                 {
-                    xSignal = signalLat[0];
-                    internalAddSignal(signalLat[0],xAxis);
+                    xSignal = signal[0];
+                    internalAddSignal(signal[0],xAxis);
                 }
             }
 
