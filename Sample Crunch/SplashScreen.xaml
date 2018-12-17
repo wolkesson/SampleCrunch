@@ -35,15 +35,16 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="100*"/>
+            <ColumnDefinition Width="166"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Canvas Background="White" Grid.RowSpan="7" >
+        <Canvas Background="White" Grid.RowSpan="6" >
             <Image Source="/Resources/SampleCrunchLogo.png" Width="{Binding Parent.ActualWidth, Mode=OneWay, RelativeSource={RelativeSource Self}}" Height="{Binding Parent.ActualHeight, Mode=OneWay, RelativeSource={RelativeSource Self}}" />
         </Canvas>
-        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="0" Text="{Binding Main.Title}" FontSize="22" FontWeight="Bold"></TextBlock>
-        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="1" Text="The free generic log file analyzer."/>
-        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="2"><Run Text="Version: "></Run><Run Text="{Binding Main.Version, Mode=OneTime}"></Run></TextBlock>
-        <TextBlock Grid.Column="1" Grid.Row="3" Foreground="White">
+        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Text="{Binding Main.Title}" FontSize="22" FontWeight="Bold"></TextBlock>
+        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Text="The free generic log file analyzer." />
+        <TextBlock Style="{StaticResource LightTextStyle}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"><Run Text="Version: "></Run><Run Text="{Binding Main.Version, Mode=OneTime}"></Run></TextBlock>
+        <TextBlock Grid.Column="1" Grid.Row="3" Foreground="White" Grid.ColumnSpan="2">
             <TextBlock.Style>
                 <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LightTextStyle}">
                     <Style.Triggers>
@@ -79,7 +80,7 @@
             </TextBlock.Style>
         </TextBlock>
 
-        <Button Grid.Column="1" Grid.Row="4" Margin="10,3" Content="Update" Command="{Binding Updater.UpdateCommand}" Background="#FFA6FF5D">
+        <Button Grid.Column="1" Grid.Row="4" Margin="10,3" Content="Update" Command="{Binding Updater.UpdateCommand}" Background="#FFA6FF5D" Grid.ColumnSpan="2">
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Visibility" Value="Hidden" />
@@ -92,7 +93,7 @@
             </Button.Style>
         </Button>
 
-        <Button x:Name="closeButton" Grid.Column="1" Grid.Row="5" Height="25" Width="130" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="closeButton_Click">
+        <Button x:Name="closeButton" Grid.Column="2" Grid.Row="5" Height="24" VerticalAlignment="Center" Click="closeButton_Click" Margin="1,8,0,8">
             <Button.Style>
                 <Style TargetType="Button">
                     <Setter Property="Visibility" Value="Visible" />
@@ -112,6 +113,7 @@
                 </Style>
             </Button.Style>
         </Button>
-        <CheckBox x:Name="checkBox" Content="Allow App Telemetry" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=AppTelemetry}" Grid.Column="1" Margin="10,10,0,0" Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Bottom" Visibility="Hidden"/>
+        <CheckBox x:Name="checkBox" Content="Allow App Telemetry" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=AppTelemetry}" Grid.Column="2" Margin="10,0,-15,0" Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Bottom" Visibility="Hidden" Height="15" Width="129"/>
+        <CheckBox Content="Get Pre-release versions" Grid.Column="1" Margin="10,12,5,12" Grid.Row="5" VerticalAlignment="Center" IsChecked="{Binding Updater.PreRelease}" ToolTip="Check to update to pre-release (beta) versions when available." Height="16"/>
     </Grid>
 </Window>

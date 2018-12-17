@@ -66,5 +66,17 @@ namespace Sample_Crunch.Properties {
                 this["FirstRun"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PreRelease {
+            get {
+                return ((bool)(this["PreRelease"]));
+            }
+            set {
+                this["PreRelease"] = value;
+            }
+        }
     }
 }

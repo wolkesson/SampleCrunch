@@ -14,12 +14,6 @@ namespace Sample_Crunch.ViewModel
     {
         public UpdateViewModel()
         {
-
-        }
-
-        public override void Cleanup()
-        {
-            base.Cleanup();
         }
 
         public Task CheckForUpdates(int timeout)
@@ -30,7 +24,6 @@ namespace Sample_Crunch.ViewModel
             {
                 if (await Task.WhenAny(task, Task.Delay(timeout)) != task)
                 {
-                    // timeout logic
                     CurrentState = State.Timedout;
                 }
             });
@@ -49,6 +42,17 @@ namespace Sample_Crunch.ViewModel
             Failed
         }
 
+        public bool PreRelease
+        {
+            get { return Properties.Settings.Default.PreRelease; }
+            set
+            {
+                Properties.Settings.Default.PreRelease = value;
+                Properties.Settings.Default.Save();
+                RaisePropertyChanged<bool>(nameof(PreRelease));
+                CheckForUpdates(10000).Start();
+            }
+        }
 
         private State state = State.Idle;
         public State CurrentState
@@ -161,7 +165,7 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 CurrentState = State.Checking;
-                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, Properties.Settings.Default.PreRelease))
                 {
                     var updates = await manager.CheckForUpdate();
                     this.lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
