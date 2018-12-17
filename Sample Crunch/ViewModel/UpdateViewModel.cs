@@ -3,7 +3,9 @@ using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
 using Squirrel;
 using System;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -14,6 +16,7 @@ namespace Sample_Crunch.ViewModel
     {
         public UpdateViewModel()
         {
+            RestoreSettings();
         }
 
         public Task CheckForUpdates(int timeout)
@@ -140,6 +143,7 @@ namespace Sample_Crunch.ViewModel
                     //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
                     await manager.ApplyReleases(updates);
                     await manager.UpdateApp();
+                    BackupSettings();
 
                     CurrentState = State.Installed;
 #endif
@@ -188,6 +192,55 @@ namespace Sample_Crunch.ViewModel
                 AppTelemetry.ReportError("Update", e);
                 CurrentState = State.Failed;
             }
+        }
+
+        /// <summary>
+        /// Make a backup of our settings.
+        /// Used to persist settings across updates.
+        /// </summary>
+        public static void BackupSettings()
+        {
+            string settingsFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            string destination = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\..\\last.config";
+            File.Copy(settingsFile, destination, true);
+        }
+
+        /// <summary>
+        /// Restore our settings backup if any.
+        /// Used to persist settings across updates.
+        /// </summary>
+        private static void RestoreSettings()
+        {
+            //Restore settings after application update            
+            string destFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            string sourceFile = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\..\\last.config";
+            // Check if we have settings that we need to restore
+            if (!File.Exists(sourceFile))
+            {
+                // Nothing we need to do
+                return;
+            }
+            // Create directory as needed
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(destFile));
+            }
+            catch (Exception) { }
+
+            // Copy our backup file in place 
+            try
+            {
+                File.Copy(sourceFile, destFile, true);
+            }
+            catch (Exception) { }
+
+            // Delete backup file
+            try
+            {
+                File.Delete(sourceFile);
+            }
+            catch (Exception) { }
+
         }
     }
 }
