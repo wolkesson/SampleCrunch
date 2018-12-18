@@ -15,6 +15,9 @@ namespace Sample_Crunch
 
         protected override void OnStartup(System.Windows.StartupEventArgs e)
         {
+            ViewModel.UpdateViewModel.RestoreSettings();
+            Sample_Crunch.Properties.Settings.Default.Reload();
+
             // Show splash screen
             SplashScreen splash = new SplashScreen();
             splash.Show();

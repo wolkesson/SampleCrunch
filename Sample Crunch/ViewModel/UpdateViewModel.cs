@@ -16,7 +16,7 @@ namespace Sample_Crunch.ViewModel
     {
         public UpdateViewModel()
         {
-            RestoreSettings();
+            
         }
 
         public Task CheckForUpdates(int timeout)
@@ -68,17 +68,6 @@ namespace Sample_Crunch.ViewModel
             }
         }
 
-        private bool updateAvailable = false;
-        public bool UpdateAvailable
-        {
-            get { return updateAvailable; }
-            private set
-            {
-                this.updateAvailable = value;
-                RaisePropertyChanged<bool>(nameof(UpdateAvailable));
-            }
-        }
-
         public string AvailableVersion
         {
             get { return (lastVersion == null ? "Checking..." : lastVersion.Version.ToString()); }
@@ -91,7 +80,7 @@ namespace Sample_Crunch.ViewModel
         {
             get
             {
-                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, () => { return this.UpdateAvailable && !this.updating; }));
+                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, () => { return this.CurrentState == State.UpdateAvailable && !this.Updating; }));
             }
         }
         private bool updating = false;
@@ -177,11 +166,9 @@ namespace Sample_Crunch.ViewModel
                     if (this.lastVersion == null)
                     {
                         CurrentState = State.NoUpdateAvailable;
-                        UpdateAvailable = false;
                     }
                     else
                     {
-                        UpdateAvailable = true;
                         CurrentState = State.UpdateAvailable;
                         RaisePropertyChanged<string>(nameof(AvailableVersion));
                     }
@@ -209,7 +196,7 @@ namespace Sample_Crunch.ViewModel
         /// Restore our settings backup if any.
         /// Used to persist settings across updates.
         /// </summary>
-        private static void RestoreSettings()
+        public static void RestoreSettings()
         {
             //Restore settings after application update            
             string destFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
