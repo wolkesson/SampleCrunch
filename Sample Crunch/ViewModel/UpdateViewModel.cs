@@ -104,7 +104,7 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 Stopwatch watch = Stopwatch.StartNew();
-                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, Properties.Settings.Default.PreRelease))
                 {
                     var updates = await manager.CheckForUpdate();
                     var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
@@ -187,9 +187,15 @@ namespace Sample_Crunch.ViewModel
         /// </summary>
         public static void BackupSettings()
         {
+            // Backup settings
             string settingsFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
-            string destination = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\..\\last.config";
+            string destDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string destination = Path.Combine(destDir, "..\\last.config");
             File.Copy(settingsFile, destination, true);
+
+            // Backup plugins
+            var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
+            Directory.Move(pluginManager.PluginPath, Path.Combine(destDir, "..\\Plugin_backup"));
         }
 
         /// <summary>
@@ -228,6 +234,10 @@ namespace Sample_Crunch.ViewModel
             }
             catch (Exception) { }
 
+            // Move plugins to plugin path
+            var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
+            string destDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            Directory.Move(Path.Combine(destDir, "..\\Plugin_backup"), pluginManager.PluginPath);
         }
     }
 }

@@ -10,7 +10,7 @@
 
     public class PluginManagerViewModel
     {
-        private string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+        public string PluginPath { get { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins"); } }
 
         public IDialogServiceExt DialogService
         {
@@ -44,6 +44,11 @@
             // Show open file dialog box 
             Nullable<bool> result = dlg.ShowDialog();
 
+            // Create directory if it does not exist
+            if (!Directory.Exists(PluginPath)) {
+                Directory.CreateDirectory(PluginPath);
+            }
+
             // Process open file dialog box results 
             if (result == true)
             {
@@ -51,13 +56,9 @@
                 foreach (var filename in dlg.FileNames)
                 {
                     try
-                    {                        
-                        // Create directory if it does not exist
-                        if (!Directory.Exists(pluginPath)) {
-                            Directory.CreateDirectory(pluginPath);
-                        }
-
-                        File.Copy(filename, Path.Combine(pluginPath, Path.GetFileName(filename)));
+                    {
+                        // Copy file to Plugin path
+                        File.Copy(filename, Path.Combine(PluginPath, Path.GetFileName(filename)));
                     }
 
                     catch (Exception ex)

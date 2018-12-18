@@ -42,24 +42,25 @@ namespace Sample_Crunch
         {
             try
             {
-                // Load plugins from plugin directory
-                string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\Plugins");
+
+                var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
 
                 // Create plugin directory
-                if (!Directory.Exists(pluginPath))
+                if (!Directory.Exists(pluginManager.PluginPath))
                 {
-                    Directory.CreateDirectory(pluginPath);
+                    Directory.CreateDirectory(pluginManager.PluginPath);
                 }
 
                 //  Move standard panels dll to plugin directory
-                string standardPanelsTargetPath = Path.Combine(pluginPath, "StandardPanels.dll");
+                string standardPanelsTargetPath = Path.Combine(pluginManager.PluginPath, "StandardPanels.dll");
                 if (!File.Exists(standardPanelsTargetPath))
                 {
                     string standardPanelsSourcePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StandardPanels.dll");
                     File.Copy(standardPanelsSourcePath, standardPanelsTargetPath, true);
                 }
 
-                List<Exception> errors = PluginFactory.LoadPlugins(pluginPath);
+                // Load plugins from plugin directory
+                List<Exception> errors = PluginFactory.LoadPlugins(pluginManager.PluginPath);
 
                 foreach (var ex in errors)
                 {
