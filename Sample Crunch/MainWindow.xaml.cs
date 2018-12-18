@@ -43,7 +43,7 @@ namespace Sample_Crunch
             try
             {
                 // Load plugins from plugin directory
-                string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\Plugins");
 
                 // Create plugin directory
                 if (!Directory.Exists(pluginPath))
