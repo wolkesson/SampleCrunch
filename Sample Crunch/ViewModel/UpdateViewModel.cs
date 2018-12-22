@@ -16,7 +16,7 @@ namespace Sample_Crunch.ViewModel
     {
         public UpdateViewModel()
         {
-            
+
         }
 
         public Task CheckForUpdates(int timeout)
@@ -111,7 +111,7 @@ namespace Sample_Crunch.ViewModel
                     CurrentState = State.Downloading;
                     await manager.DownloadReleases(new[] { lastVersion });
 #if DEBUG
-            System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
+                    System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
 
 #else
                     CurrentState = State.Installing;
@@ -188,14 +188,15 @@ namespace Sample_Crunch.ViewModel
         public static void BackupSettings()
         {
             // Backup settings
+            string appDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             string settingsFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
-            string destDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            string destination = Path.Combine(destDir, "..\\last.config");
-            File.Copy(settingsFile, destination, true);
+            string settingsBackup = Path.Combine(appDir, "..\\last.config");
+            File.Copy(settingsFile, settingsBackup, true);
 
             // Backup plugins
             var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
-            Directory.Move(pluginManager.PluginPath, Path.Combine(destDir, "..\\Plugin_backup"));
+            string destDir = Path.Combine(appDir, "..\\Plugin_backup");
+            Directory.Move(pluginManager.PluginPath, destDir);
         }
 
         /// <summary>
@@ -204,46 +205,39 @@ namespace Sample_Crunch.ViewModel
         /// </summary>
         public static void RestoreSettings()
         {
-            //Restore settings after application update            
-            string destFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
-            string sourceFile = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\..\\last.config";
+            //Restore settings after application update
+            string appDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string settingsFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            string settingsBackup = Path.Combine(appDir, "..\\last.config");
+
             // Check if we have settings that we need to restore
-            if (!File.Exists(sourceFile))
+            if (File.Exists(settingsBackup))
             {
-                // Nothing we need to do
-                return;
-            }
-            // Create directory as needed
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(destFile));
-            }
-            catch (Exception) { }
+                try
+                {
+                    // Create directory as needed
+                    Directory.CreateDirectory(Path.GetDirectoryName(settingsFile));
 
-            // Copy our backup file in place 
-            try
-            {
-                File.Copy(sourceFile, destFile, true);
+                    // Copy our backup file in place
+                    File.Copy(settingsBackup, settingsFile, true);
+                    File.Delete(settingsBackup);
+                }
+                catch (Exception) { }
             }
-            catch (Exception) { }
-
-            // Delete backup file
-            try
-            {
-                File.Delete(sourceFile);
-            }
-            catch (Exception) { }
 
             // Move plugins to plugin path
-            string parDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-            string srcDir = Path.Combine(parDir, "..\\Plugin_backup");
-            string destDir = Path.Combine(parDir, "Plugins");
-            string srcFile = Path.Combine(srcDir, "StandardPanels.dll");
+            string srcDir = Path.Combine(appDir, "..\\Plugin_backup");
+            string dstDir = Path.Combine(appDir, "Plugins"); // pluginManager not available yet
+            string stdFile = Path.Combine(srcDir, "StandardPanels.dll");
 
-            // We don't want to copy the standard plugins provided with this release.
-            if (File.Exists(srcFile)) File.Delete(srcFile); 
+            // We don't want to overwrite the StandardPlugins.dll from this release.
+            if (File.Exists(stdFile)) File.Delete(stdFile);
 
-            Directory.Move(srcDir, destDir);
+            try
+            {
+                Directory.Move(srcDir, dstDir);
+            }
+            catch (Exception) { }
         }
     }
 }
