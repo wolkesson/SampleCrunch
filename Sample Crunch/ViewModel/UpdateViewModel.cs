@@ -235,7 +235,10 @@ namespace Sample_Crunch.ViewModel
 
             try
             {
-                Directory.Move(srcDir, dstDir);
+                if (Directory.Exists(srcDir) && !Directory.Exists(dstDir))
+                {
+                    Directory.Move(srcDir, dstDir);
+                }
             }
             catch (Exception) { }
         }
