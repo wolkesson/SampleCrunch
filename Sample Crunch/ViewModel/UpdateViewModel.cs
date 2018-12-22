@@ -3,7 +3,9 @@ using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
 using Squirrel;
 using System;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -14,6 +16,7 @@ namespace Sample_Crunch.ViewModel
     {
         public UpdateViewModel()
         {
+
         }
 
         public Task CheckForUpdates(int timeout)
@@ -65,17 +68,6 @@ namespace Sample_Crunch.ViewModel
             }
         }
 
-        private bool updateAvailable = false;
-        public bool UpdateAvailable
-        {
-            get { return updateAvailable; }
-            private set
-            {
-                this.updateAvailable = value;
-                RaisePropertyChanged<bool>(nameof(UpdateAvailable));
-            }
-        }
-
         public string AvailableVersion
         {
             get { return (lastVersion == null ? "Checking..." : lastVersion.Version.ToString()); }
@@ -88,7 +80,7 @@ namespace Sample_Crunch.ViewModel
         {
             get
             {
-                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, () => { return this.UpdateAvailable && !this.updating; }));
+                return updateCommand ?? (updateCommand = new RelayCommand(Execute_UpdateCommand, () => { return this.CurrentState == State.UpdateAvailable && !this.Updating; }));
             }
         }
         private bool updating = false;
@@ -112,14 +104,14 @@ namespace Sample_Crunch.ViewModel
             try
             {
                 Stopwatch watch = Stopwatch.StartNew();
-                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, true))
+                using (var manager = await UpdateManager.GitHubUpdateManager("https://github.com/wolkesson/SampleCrunch", null, null, null, Properties.Settings.Default.PreRelease))
                 {
                     var updates = await manager.CheckForUpdate();
                     var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
                     CurrentState = State.Downloading;
                     await manager.DownloadReleases(new[] { lastVersion });
 #if DEBUG
-            System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
+                    System.Windows.Forms.MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
 
 #else
                     CurrentState = State.Installing;
@@ -140,6 +132,7 @@ namespace Sample_Crunch.ViewModel
                     //System.Windows.Forms.MessageBox.Show("The application has been updated - please restart the app.");
                     await manager.ApplyReleases(updates);
                     await manager.UpdateApp();
+                    BackupSettings();
 
                     CurrentState = State.Installed;
 #endif
@@ -173,11 +166,9 @@ namespace Sample_Crunch.ViewModel
                     if (this.lastVersion == null)
                     {
                         CurrentState = State.NoUpdateAvailable;
-                        UpdateAvailable = false;
                     }
                     else
                     {
-                        UpdateAvailable = true;
                         CurrentState = State.UpdateAvailable;
                         RaisePropertyChanged<string>(nameof(AvailableVersion));
                     }
@@ -188,6 +179,68 @@ namespace Sample_Crunch.ViewModel
                 AppTelemetry.ReportError("Update", e);
                 CurrentState = State.Failed;
             }
+        }
+
+        /// <summary>
+        /// Make a backup of our settings.
+        /// Used to persist settings across updates.
+        /// </summary>
+        public static void BackupSettings()
+        {
+            // Backup settings
+            string appDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string settingsFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            string settingsBackup = Path.Combine(appDir, "..\\last.config");
+            File.Copy(settingsFile, settingsBackup, true);
+
+            // Backup plugins
+            var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
+            string destDir = Path.Combine(appDir, "..\\Plugin_backup");
+            Directory.Move(pluginManager.PluginPath, destDir);
+        }
+
+        /// <summary>
+        /// Restore our settings backup if any.
+        /// Used to persist settings across updates.
+        /// </summary>
+        public static void RestoreSettings()
+        {
+            //Restore settings after application update
+            string appDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string settingsFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            string settingsBackup = Path.Combine(appDir, "..\\last.config");
+
+            // Check if we have settings that we need to restore
+            if (File.Exists(settingsBackup))
+            {
+                try
+                {
+                    // Create directory as needed
+                    Directory.CreateDirectory(Path.GetDirectoryName(settingsFile));
+
+                    // Copy our backup file in place
+                    File.Copy(settingsBackup, settingsFile, true);
+                    File.Delete(settingsBackup);
+                }
+                catch (Exception) { }
+            }
+
+            // Move plugins to plugin path
+            string srcDir = Path.Combine(appDir, "..\\Plugin_backup");
+            string dstDir = Path.Combine(appDir, "Plugins"); // pluginManager not available yet
+            string stdFile = Path.Combine(srcDir, "StandardPanels.dll");
+
+            // We don't want to overwrite the StandardPlugins.dll from this release.
+            if (File.Exists(stdFile)) File.Delete(stdFile);
+
+            try
+            {
+                if (Directory.Exists(srcDir) && !Directory.Exists(dstDir))
+                {
+                    Directory.Move(srcDir, dstDir);
+                }
+            }
+            catch (Exception) { }
         }
     }
 }
