@@ -42,7 +42,6 @@ namespace Sample_Crunch
         {
             try
             {
-
                 var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
 
                 // Create plugin directory

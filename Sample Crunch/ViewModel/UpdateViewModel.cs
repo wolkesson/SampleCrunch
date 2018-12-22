@@ -237,7 +237,13 @@ namespace Sample_Crunch.ViewModel
             // Move plugins to plugin path
             var pluginManager = SimpleIoc.Default.GetInstance<ViewModel.PluginManagerViewModel>();
             string destDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            Directory.Move(Path.Combine(destDir, "..\\Plugin_backup"), pluginManager.PluginPath);
+            string srcDir = Path.Combine(destDir, "..\\Plugin_backup");
+            string srcFile = Path.Combine(srcDir, "StandardPanels.dll");
+
+            // We don't want to copy the standard plugins provided with this release.
+            if (File.Exists(srcFile)) File.Delete(srcFile); 
+
+            Directory.Move(srcDir, pluginManager.PluginPath);
         }
     }
 }
