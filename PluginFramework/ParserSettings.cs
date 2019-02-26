@@ -50,5 +50,16 @@
         {
             return settings[key];
         }
+
+        /// <summary>
+        /// Reads setting from collection or return the default value if not exist
+        /// </summary>
+        /// <param name="key">The key of the value to read.</param>
+        /// <param name="defaultValue">The value to return if the key does not exist.</param>
+        /// <returns>The read value.</returns>
+        public object Read(string key, object defaultValue)
+        {
+            return settings.ContainsKey(key) ? settings[key] : defaultValue;
+        }
     }
 }

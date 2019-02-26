@@ -1,6 +1,7 @@
 ﻿using PluginFramework;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 
@@ -14,12 +15,14 @@ namespace Sample_Crunch.StandardPanels
         private SignalList signals;
         private int timeColumn = 0;
         private char splitChar = ';';
+        private NumberFormatInfo nfi;
         private DateTime[] timeVector;
 
         public CsvFile(string filename, ParserSettings settings)
         {
-            splitChar = (char)settings.Read("Delimiter");
-            timeColumn = (int) settings.Read("TimeVector");
+            splitChar = (char)settings.Read("Delimiter", ';');
+            nfi = new NumberFormatInfo() { NumberDecimalSeparator = settings.Read("Decimal", ".").ToString() };
+            timeColumn = (int) settings.Read("TimeVector", 0);
 
             this.fileName = filename;
 
@@ -122,7 +125,7 @@ namespace Sample_Crunch.StandardPanels
                 var line = reader.ReadLine();
                 var values = line.Split(splitChar);
                 double value = double.NaN;
-                if (values.Length > signal.UID && double.TryParse(values[signal.UID], out value))
+                if (values.Length > signal.UID && double.TryParse(values[signal.UID], NumberStyles.Any, nfi, out value))
                 {
                     var sample = new Sample() { Time = timeVector[row], Value = value };
                     samples.Add(sample);
@@ -166,6 +169,7 @@ namespace Sample_Crunch.StandardPanels
             if (f.ShowDialog().Value)
             {
                 settings.Write("Delimiter", CsvViewModel.GetDelimiter(settingsModel.SelectedDelimiter));
+                settings.Write("Decimal", CsvViewModel.GetDecimalSeparator(settingsModel.SelectedDecimalSeparator));
                 settings.Write("TimeVector", settingsModel.SelectedTimeVector);
                 return true;
             }

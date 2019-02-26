@@ -34,11 +34,19 @@
             Tab
         }
 
+        public enum DecimalType
+        {
+            Dot,
+            Comma,
+            Colon
+        }
+
         public CsvViewModel(string titleLine)
         {
             this.titleLine = titleLine;
             this.SelectedDelimiter = DelimiterType.Semicolon;
             RaisePropertyChanged(nameof(SelectedDelimiter));
+            RaisePropertyChanged(nameof(SelectedDecimalSeparator));
         }
 
         public static char GetDelimiter(DelimiterType delimiter)
@@ -54,6 +62,21 @@
                     return '\t';
             }
         }
+
+        public static char GetDecimalSeparator(DecimalType decimalSeparator)
+        {
+            switch (decimalSeparator)
+            {
+                default:
+                case DecimalType.Dot:
+                    return '.';
+                case DecimalType.Comma:
+                    return ',';
+                case DecimalType.Colon:
+                    return ':';
+            }
+        }
+        public DecimalType SelectedDecimalSeparator { get; set; } = DecimalType.Dot;
 
         private DelimiterType delimiter = DelimiterType.Semicolon;
         public DelimiterType SelectedDelimiter
@@ -78,6 +101,8 @@
         }
 
         public string[] Delimiters { get { return Enum.GetNames(typeof(DelimiterType)); } }
+
+        public string[] Decimals { get { return Enum.GetNames(typeof(DecimalType)); } }
 
         public string[] TimeVectors { get; private set; }
         private int selectedTimeVector = -1;
