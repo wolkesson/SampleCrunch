@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("UnitTestProject")]
 
 namespace Sample_Crunch.StandardPanels
 {
@@ -12,6 +15,7 @@ namespace Sample_Crunch.StandardPanels
         private readonly string fileName;
         private readonly MemoryMappedFile file;
         private MemoryMappedViewStream fs;
+        private StreamReader sr;
         private SignalList signals;
         private int timeColumn = 0;
         private char splitChar = ';';
@@ -20,15 +24,10 @@ namespace Sample_Crunch.StandardPanels
 
         public CsvFile(string filename, ParserSettings settings)
         {
-            splitChar = (char)settings.Read("Delimiter", ';');
-            nfi = new NumberFormatInfo() { NumberDecimalSeparator = settings.Read("Decimal", ".").ToString() };
-            timeColumn = (int) settings.Read("TimeVector", 0);
-
-            this.fileName = filename;
-
+            readSettings(settings);
             this.file = MemoryMappedFile.CreateFromFile(
                //include a readonly shared stream
-               File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read),
+               File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read),
                //not mapping to a name
                null,
                //use the file's actual size
@@ -43,8 +42,30 @@ namespace Sample_Crunch.StandardPanels
                false);
 
             this.fs = file.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read);
-            StreamReader sr = new StreamReader(fs);
-            
+            this.sr = new StreamReader(fs);
+            readSignalsAndTime();
+        }
+
+        /// <summary>
+        /// Only used for testing
+        /// </summary>
+        /// <param name="settings"></param>
+        internal CsvFile(StreamReader sr, ParserSettings settings)
+        {
+            this.sr = sr;
+            readSettings(settings);
+            readSignalsAndTime();
+        }
+
+        private void readSettings(ParserSettings settings)
+        {
+            splitChar = (char)settings.Read("Delimiter", ';');
+            nfi = new NumberFormatInfo() { NumberDecimalSeparator = settings.Read("Decimal", ".").ToString() };
+            timeColumn = (int)settings.Read("TimeVector", 0);
+        }
+
+        internal void readSignalsAndTime() {
+
             // Assume first line to be titles
             string titleLine = sr.ReadLine();
             var titles = titleLine.Split(new char[] { splitChar }, StringSplitOptions.RemoveEmptyEntries);
@@ -70,7 +91,7 @@ namespace Sample_Crunch.StandardPanels
                     // Try to parse as double
                     double doubleValue;
                     DateTime dt;
-                    if (double.TryParse(timeStr, out doubleValue))
+                    if (double.TryParse(timeStr, NumberStyles.Any, nfi, out doubleValue))
                     {
                         dt = new DateTime((long)(doubleValue * TimeSpan.TicksPerSecond));
                         samples.Add(dt);
@@ -111,18 +132,17 @@ namespace Sample_Crunch.StandardPanels
 
         public Sample[] ReadSignal(Signal signal)
         {
-            fs.Seek(0, SeekOrigin.Begin);
-            StreamReader reader = new StreamReader(fs);
+            sr.BaseStream.Seek(0, SeekOrigin.Begin);
 
             // Assume first line to be titles
-            string titleLine = reader.ReadLine();
+            string titleLine = sr.ReadLine();
             var titles = titleLine.Split(splitChar);
 
             List<Sample> samples = new List<Sample>();
             int row = 0;
-            while (!reader.EndOfStream)
+            while (!sr.EndOfStream)
             {
-                var line = reader.ReadLine();
+                var line = sr.ReadLine();
                 var values = line.Split(splitChar);
                 double value = double.NaN;
                 if (values.Length > signal.UID && double.TryParse(values[signal.UID], NumberStyles.Any, nfi, out value))

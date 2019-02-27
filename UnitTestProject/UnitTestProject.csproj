@@ -79,6 +79,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Controls\TimelineTests.cs" />
+    <Compile Include="CsvFileTests.cs" />
     <Compile Include="HelpersTests.cs" />
     <Compile Include="Mock\MockServiceProvider.cs" />
     <Compile Include="ParserSettingsTests.cs" />
