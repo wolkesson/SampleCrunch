@@ -9,7 +9,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <DockPanel>
-        <oxy:PlotView x:Name="plot" Title="{Binding Title}" Model="{Binding PlotModel}"  Drop="Plot1_Drop" DragEnter="plot_DragOver" DragOver="plot_DragOver" AllowDrop="True">
+        <oxy:PlotView x:Name="plot" Model="{Binding PlotModel}"  Drop="Plot1_Drop" DragEnter="plot_DragOver" DragOver="plot_DragOver" AllowDrop="True">
             <oxy:PlotView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Delete Signal" Command="{Binding RemoveSignalCommand}" CommandParameter="{Binding SelectedSeries}"/>

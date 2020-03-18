@@ -21,16 +21,17 @@ namespace Sample_Crunch.StandardPanels.ViewModel
             PlotModel.IsLegendVisible = false;
 
             // Add the tile map annotation
-            PlotModel.Annotations.Add(
+            PlotModel.Annotations.Add( 
                      new TileMapAnnotation
                      {
-                         Url = "http://tile.openstreetmap.org/{Z}/{X}/{Y}.png",
+                         Url = "https://tile.openstreetmap.org/{Z}/{X}/{Y}.png",
                          CopyrightNotice = "OpenStreetMap",
                          MinZoomLevel = 5,
                          MaxZoomLevel = 19,
                          Selectable = false,
                          Layer = AnnotationLayer.BelowAxes,
-                         MaxNumberOfDownloads = 8
+                         MaxNumberOfDownloads = 2,
+                         UserAgent = "Sample Crunch"
                      });
 
             xAxis = new LinearAxis()

@@ -129,7 +129,6 @@ namespace Sample_Crunch.StandardPanels.ViewModel
                 StrokeThickness = 1,
                 CanTrackerInterpolatePoints = false,
                 Title = signal.Title,
-                Smooth = false,
                 Decimator = Decimator.Decimate,
                 TrackerFormatString = "{1}: \t{2:HH:mm:ss}\n{3}: \t{4}"
             };
